@@ -1,0 +1,48 @@
+.contact { padding-bottom: 80px; }
+
+.hero {
+  padding: 80px var(--pad) 56px; border-bottom: 1px solid var(--line);
+  display: grid; grid-template-columns: 1fr; gap: 32px;
+}
+.heroTitle {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(40px, 6.4vw, 96px); line-height: 0.98;
+  letter-spacing: -0.02em; margin: 0; max-width: 18ch; text-wrap: pretty;
+}
+.heroTitle em { font-style: italic; color: var(--accent); }
+
+.grid {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 64px; padding: 48px var(--pad); align-items: start;
+}
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.side h4 {
+  font-family: var(--f-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 8px;
+}
+.side h4 + h4 { margin-top: 28px; }
+.side p { font-size: 15px; line-height: 1.5; margin: 0; }
+.side h4 { margin-top: 28px; }
+.side h4:first-child { margin-top: 0; }
+.side a { color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.side a:hover { border-color: var(--ink); }
+
+.form { max-width: none; }
+.form select, .form textarea {
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--surface); font-size: 14px; font-family: inherit;
+  resize: vertical; width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form select:focus, .form textarea:focus {
+  outline: none; border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ink) 8%, transparent);
+}
+
+.sent { display: flex; flex-direction: column; gap: 16px; padding: 48px 0; }
+.sent h2 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(28px, 3vw, 40px); line-height: 1.1; letter-spacing: -0.01em; margin: 0;
+}

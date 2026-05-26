@@ -1,0 +1,51 @@
+.ft {
+  border-top: 1px solid var(--line);
+  background: color-mix(in oklab, var(--bg) 92%, var(--ink) 8%);
+}
+.inner {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.4fr;
+  gap: 40px;
+  padding: 64px var(--pad) 40px;
+}
+@media (max-width: 800px) { .inner { grid-template-columns: 1fr 1fr; } }
+.col h4 {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+.col ul { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.col ul li { cursor: pointer; color: var(--muted); transition: color 0.15s; }
+.col ul li:hover { color: var(--ink); }
+.col a { color: var(--muted); }
+.col a:hover { color: var(--ink); }
+.brand { margin-bottom: 0; }
+.brandName { font-family: var(--f-display); font-size: 20px; letter-spacing: -0.01em; }
+.brandName em { color: var(--accent); font-style: italic; }
+.blurb { font-size: 13px; color: var(--muted); margin: 12px 0 0; max-width: 36ch; }
+.sub {
+  display: flex;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+.sub input { flex: 1; border: 0; background: transparent; padding: 10px 12px; font-size: 13px; outline: none; }
+.sub button { padding: 10px 14px; color: var(--muted); font-size: 16px; }
+.sub button:hover { color: var(--ink); }
+.base {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px var(--pad);
+  border-top: 1px solid var(--line);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+@media (max-width: 700px) { .base { flex-direction: column; gap: 6px; } }

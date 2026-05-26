@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\Art\" -Force -Recurse | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\Art\" -Force | Where-Object { $_.Name -eq '.thumbnail' } | Get-ChildItem -Force -ErrorAction SilentlyContinue)",
+      "Bash(npx create-next-app@latest atelier --typescript --no-tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npm install *)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\lib\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\context\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\components\\\\Header\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\components\\\\Footer\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\components\\\\CartDrawer\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\components\\\\ArtPlaceholder\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\components\\\\ArtworkCard\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\components\\\\TweaksPanel\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\app\\\\works\\\\[id]\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\app\\\\studio\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\app\\\\contact\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\app\\\\checkout\" \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\\\\src\\\\app\\\\confirmation\" 2>&1)",
+      "Bash(npx next *)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Invoke-WebRequest -Uri \"http://localhost:3001\" -UseBasicParsing -TimeoutSec 8)",
+      "Bash(Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(Start-Job -ScriptBlock { cd \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\atelier\"; npx next dev --port 3001 2>&1 } | Out-Null; Start-Sleep -Seconds 8; try { \\(Invoke-WebRequest -Uri \"http://localhost:3001\" -UseBasicParsing -TimeoutSec 5\\).StatusCode } catch { \"Server not yet ready: $_\" })",
+      "PowerShell(Start-Sleep -Seconds 10; try { \\(Invoke-WebRequest -Uri \"http://localhost:3001\" -UseBasicParsing -TimeoutSec 8\\).StatusCode } catch { \"not ready: $_\" })",
+      "Bash(ls /c/Users/mkmen/Documents/GitHub/BUSINESS_REPOS/Tripple-A-Gallery/src/lib/ && ls /c/Users/mkmen/Documents\\\\GitHub/BUSINESS_REPOS/Tripple-A-Gallery/src/app/)",
+      "Read(//c/Users/mkmen/DocumentsGitHub/BUSINESS_REPOS/Tripple-A-Gallery/src/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery\\atelier\\src\\app\\works"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+.checkout { padding: 24px var(--pad) 80px; min-height: 100%; }
+.grid {
+  display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(360px, 1fr);
+  gap: 64px; align-items: start;
+}
+@media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+.main { display: flex; flex-direction: column; gap: 24px; }
+.back { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+.back:hover { color: var(--ink); }
+.title { font-family: var(--f-display); font-weight: 400; font-size: clamp(40px, 5vw, 64px); letter-spacing: -0.02em; margin: 0 0 8px; }
+
+.steps { display: flex; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.step { display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 10px; border-radius: 999px; color: var(--muted); font-size: 13px; }
+.stepOn { color: var(--ink); background: color-mix(in oklab, var(--ink) 6%, transparent); }
+.stepDone { color: var(--accent); }
+.stepNum { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; }
+
+.empty { padding: 120px 20px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.empty h1 { font-family: var(--f-display); font-weight: 400; font-size: 40px; margin: 0; }
+.empty button { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+.side {
+  position: sticky; top: 88px; display: flex; flex-direction: column; gap: 14px;
+  padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+}
+.items { display: flex; flex-direction: column; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.items > li { display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: start; }
+.coThumb { width: 56px; }
+.coInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.coTitle { font-family: var(--f-display); font-size: 15px; }
+.coMeta { font-size: 11px; color: var(--muted); }
+.coQty { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.coPrice { font-family: var(--f-mono); font-size: 13px; }
+.totals { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.totals > div { display: flex; justify-content: space-between; color: var(--muted); }
+.totals dt, .totals dd { margin: 0; }
+.totalRow { padding-top: 8px; border-top: 1px solid var(--line); color: var(--ink); }
+.totalRow dd { font-family: var(--f-display); font-size: 22px; }
+.coNote { font-size: 11px; color: var(--muted); margin: 4px 0 0; }
