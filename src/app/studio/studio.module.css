@@ -103,16 +103,9 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  /* cap height so portrait videos don't tower — cards stay proportional */
   max-width: 840px;
 }
-@media (max-width: 900px) {
-  .videoGridRow {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 100%;
-  }
-}
-@media (max-width: 600px) { .videoGridRow { grid-template-columns: 1fr; max-width: 360px; } }
+@media (max-width: 600px) { .videoGridRow { gap: 8px; max-width: 100%; } }
 
 /* Slideshow section */
 .slideshowSection {
@@ -145,44 +138,31 @@
 }
 .slideImg { width: 100%; height: auto; display: block; }
 
-/* Side nav arrows */
-.sideArrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.82);
-  color: #111;
-  font-size: 18px;
+/* Controls bar below slideshow image */
+.slideControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px 0;
+}
+.slideArrow {
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.14);
-  transition: background 0.15s, transform 0.15s;
-  backdrop-filter: blur(4px);
-  z-index: 2;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
 }
-.sideArrow:hover { background: #fff; transform: translateY(-50%) scale(1.06); }
-.sideArrowL { left: 12px; }
-.sideArrowR { right: 12px; }
-
-/* Bottom overlay — dots + counter */
-.slideOverlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px;
-  background: linear-gradient(to top, rgba(0,0,0,0.32) 0%, transparent 100%);
-  z-index: 2;
-}
-.slideDots { display: flex; gap: 5px; align-items: center; }
+.slideArrow:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); border-color: var(--ink); }
+.slideDots { display: flex; gap: 5px; align-items: center; flex: 1; justify-content: center; }
 .dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(255,255,255,0.45);
+  background: var(--line);
   transition: background 0.2s, transform 0.2s;
   cursor: pointer;
 }
-.dotOn { background: #fff; transform: scale(1.3); }
-.slideNum { font-family: var(--f-mono); font-size: 10px; color: rgba(255,255,255,0.7); letter-spacing: 0.08em; }
+.dotOn { background: var(--ink); transform: scale(1.3); }
+.slideNum { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; flex-shrink: 0; }
 
 @media (max-width: 800px) { .ctaRow { grid-template-columns: 1fr; gap: 16px; } }
 .ctaRow h3 {

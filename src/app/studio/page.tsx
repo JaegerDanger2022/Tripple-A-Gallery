@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ARTIST } from "@/lib/data";
 import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
 import styles from "./studio.module.css";
@@ -26,25 +27,27 @@ function ProfileSlideshow() {
           alt={SLIDES[idx].alt}
           className={styles.slideImg}
         />
+      </div>
 
-        {/* Side arrows — overlaid on the image */}
-        <button className={`${styles.sideArrow} ${styles.sideArrowL}`} onClick={prev} aria-label="Previous">←</button>
-        <button className={`${styles.sideArrow} ${styles.sideArrowR}`} onClick={next} aria-label="Next">→</button>
-
-        {/* Dots + counter — overlaid at the bottom */}
-        <div className={styles.slideOverlay}>
-          <div className={styles.slideDots}>
-            {SLIDES.map((_, i) => (
-              <button
-                key={i}
-                className={`${styles.dot} ${i === idx ? styles.dotOn : ""}`}
-                onClick={() => setIdx(i)}
-                aria-label={`Slide ${i + 1}`}
-              />
-            ))}
-          </div>
-          <span className={styles.slideNum}>{idx + 1} / {NUM_SLIDES}</span>
+      {/* Controls bar below image */}
+      <div className={styles.slideControls}>
+        <button className={styles.slideArrow} onClick={prev} aria-label="Previous">
+          <ChevronLeft size={18} strokeWidth={1.6} />
+        </button>
+        <div className={styles.slideDots}>
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              className={`${styles.dot} ${i === idx ? styles.dotOn : ""}`}
+              onClick={() => setIdx(i)}
+              aria-label={`Slide ${i + 1}`}
+            />
+          ))}
         </div>
+        <span className={styles.slideNum}>{idx + 1} / {NUM_SLIDES}</span>
+        <button className={styles.slideArrow} onClick={next} aria-label="Next">
+          <ChevronRight size={18} strokeWidth={1.6} />
+        </button>
       </div>
     </div>
   );
