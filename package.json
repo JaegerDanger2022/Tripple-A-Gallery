@@ -18,12 +18,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "firebase-admin": "^13.10.0",
-    "pdfjs-dist": "^5.4.624",
-    "puppeteer": "^24.43.1",
     "typescript": "^5"
   }
 }
