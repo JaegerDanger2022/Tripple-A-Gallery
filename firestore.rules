@@ -3,19 +3,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Artworks — public read, no client writes (all writes go through Admin SDK / server)
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Artworks — public read, admin write
     match /artworks/{docId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
-    // Categories — public read, no client writes
+    // Categories — public read, admin write
     match /categories/{docId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
-    // Admins — a user can only read their own admin doc (to check if they have access)
+    // Admins — a user can only read their own doc
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
