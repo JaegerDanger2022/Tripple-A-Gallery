@@ -1,6 +1,7 @@
 .wrap {
   position: relative;
   width: 100%;
+  aspect-ratio: 816 / 464;
   background: #000;
   border-radius: 6px;
   overflow: hidden;
@@ -10,9 +11,8 @@
 .video {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 80vh;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
 }
 
 .play {

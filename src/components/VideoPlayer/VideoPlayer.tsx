@@ -24,11 +24,12 @@ export default function VideoPlayer({ src, label }: Props) {
       <video
         ref={videoRef}
         className={styles.video}
-        src={src}
         playsInline
         onEnded={() => setPlaying(false)}
         onClick={toggle}
-      />
+      >
+        <source src={src} type="video/mp4" />
+      </video>
       {!playing && (
         <button className={styles.play} onClick={toggle} aria-label="Play video">
           <span className={styles.playIcon}>▶</span>
