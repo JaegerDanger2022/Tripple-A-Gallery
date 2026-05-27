@@ -47,8 +47,9 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
           id: f.id,
           label: f.name,
           sub: f.description,
+          // fixed with price 0 = use the artwork's own price (e.g. Original)
           price: f.priceMode === "fixed"
-            ? f.fixedPrice
+            ? (f.fixedPrice > 0 ? f.fixedPrice : a.price || 0)
             : Math.round((a.price || 200) * f.percentBase + f.percentAdd),
         }))
     : getVariants(a);
