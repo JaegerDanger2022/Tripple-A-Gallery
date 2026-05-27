@@ -41,14 +41,9 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const variants = getVariants(a);
   const v = variants.find((x) => x.id === variant) ?? variants[0];
 
-  // Build frame list: always have "Unframed" first, then Firestore frames with price > 0
-  const frameOpts = frames.length > 0
-    ? frames
-    : [
-        { id: "none", name: "Unframed", color: "#e8e4dc", price: 0,   order: 0 },
-        { id: "oak",  name: "Oak",      color: "#c9a87c", price: 120,  order: 1 },
-        { id: "black",name: "Black ash",color: "#2a2a2a", price: 140,  order: 2 },
-      ];
+  // Unframed is always shown; paid frames only appear when admin has added them
+  const unframed = { id: "none", name: "Unframed", color: "#e8e4dc", price: 0, order: -1 };
+  const frameOpts = frames.length > 0 ? frames : [unframed];
   const selectedFrame = frameOpts.find((f) => f.id === frameId) ?? frameOpts[0];
   const total = v.price + (selectedFrame?.price ?? 0);
 

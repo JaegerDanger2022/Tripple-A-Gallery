@@ -103,15 +103,9 @@ export async function reorderCategories(
 
 // ── Frames ───────────────────────────────────────────────────────────────────
 
-const SEED_FRAMES: Omit<FrameOption, "id">[] = [
-  { name: "Unframed", color: "#e8e4dc", price: 0,   order: 0 },
-  { name: "Oak",      color: "#c9a87c", price: 120,  order: 1 },
-  { name: "Black ash",color: "#2a2a2a", price: 140,  order: 2 },
-];
-
 export async function getFrames(): Promise<FrameOption[]> {
   const snap = await getDocs(query(framesCol(), orderBy("order", "asc")));
-  if (snap.empty) return SEED_FRAMES.map((f, i) => ({ ...f, id: String(i) }));
+  if (snap.empty) return [];
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FrameOption));
 }
 
