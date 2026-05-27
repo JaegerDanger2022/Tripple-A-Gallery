@@ -112,6 +112,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/categories" className={pathname.startsWith("/admin/categories") ? styles.active : ""}>
             <span className={styles.navIcon}>◈</span> Categories
           </Link>
+          <Link href="/admin/frames" className={pathname.startsWith("/admin/frames") ? styles.active : ""}>
+            <span className={styles.navIcon}>⬚</span> Frames
+          </Link>
         </nav>
         <div className={styles.sidebarFooter}>
           <Link href="/" className={styles.backLink}>← Back to gallery</Link>

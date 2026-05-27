@@ -167,7 +167,7 @@ export default function TweaksPanel() {
           <button className="twk-btn" onClick={() => { window.location.href = "/works/a03"; }}>Open a sample work</button>
           <button className="twk-btn" onClick={() => {
             const price = Math.round(2400 * 0.15 + 140) + 120;
-            addToCart({ id: "a03-print-oak", artworkId: "a03", variantId: "print", variantLabel: "Print, standard", frame: "oak", price, qty: 1 });
+            addToCart({ id: "a03-print-oak", artworkId: "a03", variantId: "print", variantLabel: "Print, standard", frameId: "oak", frameLabel: "Oak", price, qty: 1 });
             setTimeout(() => { window.location.href = "/checkout"; }, 50);
           }}>Jump to checkout (sample)</button>
         </div>

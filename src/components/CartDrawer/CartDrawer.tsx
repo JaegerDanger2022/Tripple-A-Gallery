@@ -45,7 +45,7 @@ export default function CartDrawer() {
                     </div>
                     <div className={styles.info}>
                       <div className={styles.itemTitle}><em>{a.title}</em></div>
-                      <div className={styles.variant}>{it.variantLabel}{it.frame !== "none" ? ` · ${it.frame} frame` : ""}</div>
+                      <div className={styles.variant}>{it.variantLabel}{it.frameId !== "none" ? ` · ${it.frameLabel}` : ""}</div>
                       <div className={styles.itemBottom}>
                         <div className={styles.qty}>
                           <button onClick={() => updateQty(it.id, Math.max(1, it.qty - 1))}>−</button>

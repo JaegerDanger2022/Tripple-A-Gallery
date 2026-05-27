@@ -29,9 +29,9 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
 
 function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const router = useRouter();
-  const { addToCart, revealArtwork, revealedArtworks, artworks } = useApp();
+  const { addToCart, revealArtwork, revealedArtworks, artworks, frames } = useApp();
   const [variant, setVariant] = useState("print");
-  const [frame, setFrame] = useState<"none" | "oak" | "black">("none");
+  const [frameId, setFrameId] = useState<string>("none");
   const [added, setAdded] = useState(false);
   const buyRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +40,17 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
 
   const variants = getVariants(a);
   const v = variants.find((x) => x.id === variant) ?? variants[0];
-  const total = v.price + (frame === "oak" ? 120 : frame === "black" ? 140 : 0);
+
+  // Build frame list: always have "Unframed" first, then Firestore frames with price > 0
+  const frameOpts = frames.length > 0
+    ? frames
+    : [
+        { id: "none", name: "Unframed", color: "#e8e4dc", price: 0,   order: 0 },
+        { id: "oak",  name: "Oak",      color: "#c9a87c", price: 120,  order: 1 },
+        { id: "black",name: "Black ash",color: "#2a2a2a", price: 140,  order: 2 },
+      ];
+  const selectedFrame = frameOpts.find((f) => f.id === frameId) ?? frameOpts[0];
+  const total = v.price + (selectedFrame?.price ?? 0);
 
   const related = artworks
     .filter((x) => x.id !== a.id && ((a.series && x.series === a.series) || x.category === a.category))
@@ -53,11 +63,12 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
 
   function onAdd() {
     addToCart({
-      id: `${a.id}-${variant}-${frame}`,
+      id: `${a.id}-${variant}-${frameId}`,
       artworkId: a.id,
       variantId: variant,
       variantLabel: v.label,
-      frame,
+      frameId,
+      frameLabel: selectedFrame?.name ?? "Unframed",
       price: total,
       qty: 1,
     });
@@ -136,18 +147,14 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                 <div className={styles.buyRow}>
                   <label className={styles.buyLbl}>Framing</label>
                   <div className={styles.frameOpts}>
-                    {([
-                      { id: "none", label: "Unframed", price: 0 },
-                      { id: "oak", label: "Oak", price: 120 },
-                      { id: "black", label: "Black ash", price: 140 },
-                    ] as const).map((f) => (
+                    {frameOpts.map((f) => (
                       <button
                         key={f.id}
-                        className={`${styles.f} ${f.id === frame ? styles.fOn : ""}`}
-                        onClick={() => setFrame(f.id)}
+                        className={`${styles.f} ${f.id === frameId ? styles.fOn : ""}`}
+                        onClick={() => setFrameId(f.id)}
                       >
-                        <span className={`${styles.fsw} ${styles[`fsw-${f.id}` as keyof typeof styles]}`} />
-                        <span>{f.label}</span>
+                        <span className={`${styles.fsw} ${f.price === 0 ? styles.fswUnframed : ""}`} style={f.price > 0 ? { background: f.color } : undefined} />
+                        <span>{f.name}</span>
                         {f.price
                           ? <span className={styles.fPrice}>+£{f.price}</span>
                           : <span className={`${styles.fPrice} ${styles.fPriceFree}`}>—</span>}

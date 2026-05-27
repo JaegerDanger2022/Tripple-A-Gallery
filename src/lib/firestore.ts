@@ -1,4 +1,4 @@
-// Firestore data access — artworks and categories CRUD
+// Firestore data access — artworks, categories and frames CRUD
 import {
   collection,
   doc,
@@ -14,13 +14,14 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Artwork, Category } from "./types";
+import type { Artwork, Category, FrameOption } from "./types";
 import { ARTWORKS as SEED_ARTWORKS } from "./data";
 
 // ── Collections ─────────────────────────────────────────────────────────────
 
 const artworksCol = () => collection(db, "artworks");
 const categoriesCol = () => collection(db, "categories");
+const framesCol = () => collection(db, "frames");
 
 // ── Artworks ─────────────────────────────────────────────────────────────────
 
@@ -97,6 +98,41 @@ export async function reorderCategories(
   ordered.forEach(({ id, order }) => {
     batch.update(doc(db, "categories", id), { order });
   });
+  await batch.commit();
+}
+
+// ── Frames ───────────────────────────────────────────────────────────────────
+
+const SEED_FRAMES: Omit<FrameOption, "id">[] = [
+  { name: "Unframed", color: "#e8e4dc", price: 0,   order: 0 },
+  { name: "Oak",      color: "#c9a87c", price: 120,  order: 1 },
+  { name: "Black ash",color: "#2a2a2a", price: 140,  order: 2 },
+];
+
+export async function getFrames(): Promise<FrameOption[]> {
+  const snap = await getDocs(query(framesCol(), orderBy("order", "asc")));
+  if (snap.empty) return SEED_FRAMES.map((f, i) => ({ ...f, id: String(i) }));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FrameOption));
+}
+
+export async function createFrame(data: Omit<FrameOption, "id">): Promise<string> {
+  const existing = await getFrames();
+  const maxOrder = existing.reduce((m, f) => Math.max(m, f.order), -1);
+  const ref = await addDoc(framesCol(), { ...data, order: maxOrder + 1 });
+  return ref.id;
+}
+
+export async function updateFrame(id: string, data: Partial<Omit<FrameOption, "id">>): Promise<void> {
+  await updateDoc(doc(db, "frames", id), data);
+}
+
+export async function deleteFrame(id: string): Promise<void> {
+  await deleteDoc(doc(db, "frames", id));
+}
+
+export async function reorderFrames(ordered: { id: string; order: number }[]): Promise<void> {
+  const batch = writeBatch(db);
+  ordered.forEach(({ id, order }) => batch.update(doc(db, "frames", id), { order }));
   await batch.commit();
 }
 

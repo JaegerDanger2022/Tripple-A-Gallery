@@ -164,7 +164,7 @@ export default function CheckoutPage() {
                   <div className={styles.coThumb}><ArtPlaceholder artwork={a} ratio="square" showLabel={false} /></div>
                   <div className={styles.coInfo}>
                     <div className={styles.coTitle}><em>{a.title}</em></div>
-                    <div className={styles.coMeta}>{it.variantLabel}{it.frame !== "none" ? ` · ${it.frame}` : ""}</div>
+                    <div className={styles.coMeta}>{it.variantLabel}{it.frameId !== "none" ? ` · ${it.frameLabel}` : ""}</div>
                     <div className={styles.coQty}>Qty {it.qty}</div>
                   </div>
                   <div className={styles.coPrice}>£{(it.price * it.qty).toLocaleString()}</div>

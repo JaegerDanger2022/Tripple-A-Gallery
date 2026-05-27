@@ -9,7 +9,7 @@ import React, {
   useEffect,
   CSSProperties,
 } from "react";
-import type { CartItem, Theme, Typography, Density, Artwork, Category } from "@/lib/types";
+import type { CartItem, Theme, Typography, Density, Artwork, Category, FrameOption } from "@/lib/types";
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data";
 
 interface TweakValues {
@@ -26,6 +26,7 @@ interface AppContextValue {
   // Data (Firestore-backed with static fallback)
   artworks: Artwork[];
   categories: Category[];
+  frames: FrameOption[];
   dataLoading: boolean;
   refreshData: () => void;
   // Cart
@@ -66,15 +67,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [revealedArtworks, setRevealedArtworks] = useState<Set<string>>(new Set());
   const [artworks, setArtworks] = useState<Artwork[]>(STATIC_ARTWORKS);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [frames, setFrames] = useState<FrameOption[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const { getArtworks, getCategories } = await import("@/lib/firestore");
-      const [arts, cats] = await Promise.all([getArtworks(), getCategories()]);
+      const { getArtworks, getCategories, getFrames } = await import("@/lib/firestore");
+      const [arts, cats, frs] = await Promise.all([getArtworks(), getCategories(), getFrames()]);
       setArtworks(arts);
       setCategories(cats);
+      setFrames(frs);
     } catch {
       // Firestore not configured yet — keep static fallback
     } finally {
@@ -117,7 +120,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       tweaks, setTweak, cssVars,
-      artworks, categories, dataLoading, refreshData: loadData,
+      artworks, categories, frames, dataLoading, refreshData: loadData,
       cart, cartCount, cartOpen, setCartOpen, addToCart, removeFromCart, updateQty, clearCart,
       revealedArtworks, revealArtwork,
     }}>

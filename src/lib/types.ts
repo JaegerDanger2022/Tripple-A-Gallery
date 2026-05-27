@@ -30,12 +30,21 @@ export interface Artist {
   statement: string;
 }
 
+export interface FrameOption {
+  id: string;
+  name: string;        // e.g. "Oak", "Black ash", "White"
+  color: string;       // CSS hex for swatch
+  price: number;       // added on top of variant price; 0 = unframed
+  order: number;
+}
+
 export interface CartItem {
   id: string;
   artworkId: string;
   variantId: string;
   variantLabel: string;
-  frame: "none" | "oak" | "black";
+  frameId: string;     // FrameOption.id, or "none"
+  frameLabel: string;  // FrameOption.name, or "Unframed"
   price: number;
   qty: number;
 }
