@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
-import { ARTWORKS } from "@/lib/data";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import styles from "./checkout.module.css";
 
@@ -35,7 +34,7 @@ function Field({ label, value, onChange, placeholder, error, type = "text" }: Fi
 }
 
 export default function CheckoutPage() {
-  const { cart, clearCart } = useApp();
+  const { cart, clearCart, artworks } = useApp();
   const { user } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -158,7 +157,8 @@ export default function CheckoutPage() {
           <div className="kicker">Order summary</div>
           <ul className={styles.items}>
             {cart.map((it) => {
-              const a = ARTWORKS.find((x) => x.id === it.artworkId)!;
+              const a = artworks.find((x) => x.id === it.artworkId);
+              if (!a) return null;
               return (
                 <li key={it.id}>
                   <div className={styles.coThumb}><ArtPlaceholder artwork={a} ratio="square" showLabel={false} /></div>

@@ -2,12 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import { ARTWORKS } from "@/lib/data";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import styles from "./CartDrawer.module.css";
 
 export default function CartDrawer() {
-  const { cart, cartOpen, setCartOpen, removeFromCart, updateQty } = useApp();
+  const { cart, cartOpen, setCartOpen, removeFromCart, updateQty, artworks } = useApp();
   const router = useRouter();
 
   const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);
@@ -37,7 +36,8 @@ export default function CartDrawer() {
           <>
             <ul className={styles.list}>
               {cart.map((it) => {
-                const a = ARTWORKS.find((x) => x.id === it.artworkId)!;
+                const a = artworks.find((x) => x.id === it.artworkId)!;
+                if (!a) return null;
                 return (
                   <li key={it.id} className={styles.item}>
                     <div className={styles.thumb}>
