@@ -9,7 +9,7 @@ import React, {
   useEffect,
   CSSProperties,
 } from "react";
-import type { CartItem, Theme, Typography, Density, Artwork, Category, FrameOption } from "@/lib/types";
+import type { CartItem, Theme, Typography, Density, Artwork, Category, FrameOption, FormatOption } from "@/lib/types";
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data";
 
 interface TweakValues {
@@ -27,6 +27,7 @@ interface AppContextValue {
   artworks: Artwork[];
   categories: Category[];
   frames: FrameOption[];
+  formats: FormatOption[];
   dataLoading: boolean;
   refreshData: () => void;
   // Cart
@@ -68,16 +69,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [artworks, setArtworks] = useState<Artwork[]>(STATIC_ARTWORKS);
   const [categories, setCategories] = useState<Category[]>([]);
   const [frames, setFrames] = useState<FrameOption[]>([]);
+  const [formats, setFormats] = useState<FormatOption[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const { getArtworks, getCategories, getFrames } = await import("@/lib/firestore");
-      const [arts, cats, frs] = await Promise.all([getArtworks(), getCategories(), getFrames()]);
+      const { getArtworks, getCategories, getFrames, getFormats } = await import("@/lib/firestore");
+      const [arts, cats, frs, fmts] = await Promise.all([getArtworks(), getCategories(), getFrames(), getFormats()]);
       setArtworks(arts);
       setCategories(cats);
       setFrames(frs);
+      setFormats(fmts);
     } catch {
       // Firestore not configured yet — keep static fallback
     } finally {
@@ -120,7 +123,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       tweaks, setTweak, cssVars,
-      artworks, categories, frames, dataLoading, refreshData: loadData,
+      artworks, categories, frames, formats, dataLoading, refreshData: loadData,
       cart, cartCount, cartOpen, setCartOpen, addToCart, removeFromCart, updateQty, clearCart,
       revealedArtworks, revealArtwork,
     }}>

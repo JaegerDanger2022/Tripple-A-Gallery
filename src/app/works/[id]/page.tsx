@@ -4,6 +4,7 @@ import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ARTIST, getVariants } from "@/lib/data";
 import { useApp } from "@/context/AppContext";
+import type { Variant } from "@/lib/types";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import ArtworkCard from "@/components/ArtworkCard/ArtworkCard";
 import type { Artwork } from "@/lib/types";
@@ -29,8 +30,8 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
 
 function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const router = useRouter();
-  const { addToCart, revealArtwork, revealedArtworks, artworks, frames } = useApp();
-  const [variant, setVariant] = useState("print");
+  const { addToCart, revealArtwork, revealedArtworks, artworks, frames, formats } = useApp();
+  const [variantId, setVariantId] = useState<string>("");
   const [frameId, setFrameId] = useState<string>("none");
   const [added, setAdded] = useState(false);
   const buyRef = useRef<HTMLDivElement>(null);
@@ -38,8 +39,21 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   // Pricing / cart is only shown after "Get a copy" is clicked
   const revealed = revealedArtworks.has(a.id);
 
-  const variants = getVariants(a);
-  const v = variants.find((x) => x.id === variant) ?? variants[0];
+  // Build variant list: from Firestore formats if available, else static fallback
+  const variants: Variant[] = formats.length > 0
+    ? formats
+        .filter((f) => f.enabled)
+        .map((f) => ({
+          id: f.id,
+          label: f.name,
+          sub: f.description,
+          price: f.priceMode === "fixed"
+            ? f.fixedPrice
+            : Math.round((a.price || 200) * f.percentBase + f.percentAdd),
+        }))
+    : getVariants(a);
+
+  const v = variants.find((x) => x.id === variantId) ?? variants[0];
 
   // Unframed is always shown; paid frames only appear when admin has added them
   const unframed = { id: "none", name: "Unframed", color: "#e8e4dc", price: 0, order: -1 };
@@ -58,10 +72,10 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
 
   function onAdd() {
     addToCart({
-      id: `${a.id}-${variant}-${frameId}`,
+      id: `${a.id}-${v?.id ?? ""}-${frameId}`,
       artworkId: a.id,
-      variantId: variant,
-      variantLabel: v.label,
+      variantId: v?.id ?? "",
+      variantLabel: v?.label ?? "",
       frameId,
       frameLabel: selectedFrame?.name ?? "Unframed",
       price: total,
@@ -128,8 +142,8 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                     {variants.map((vv) => (
                       <button
                         key={vv.id}
-                        className={`${styles.v} ${vv.id === variant ? styles.vOn : ""}`}
-                        onClick={() => setVariant(vv.id)}
+                        className={`${styles.v} ${vv.id === (v?.id ?? "") ? styles.vOn : ""}`}
+                        onClick={() => setVariantId(vv.id)}
                       >
                         <span className={styles.vLabel}>{vv.label}</span>
                         <span className={styles.vSub}>{vv.sub}</span>

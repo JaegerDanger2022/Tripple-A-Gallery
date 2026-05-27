@@ -49,6 +49,18 @@ export interface CartItem {
   qty: number;
 }
 
+export interface FormatOption {
+  id: string;
+  name: string;           // e.g. "Print, small"
+  description: string;    // e.g. "A4 · open edition · giclée"
+  priceMode: "fixed" | "percent";
+  fixedPrice: number;     // used when priceMode = "fixed"
+  percentBase: number;    // multiplier of artwork price, e.g. 0.15
+  percentAdd: number;     // flat amount added after %, e.g. 140
+  order: number;
+  enabled: boolean;
+}
+
 export interface Variant {
   id: string;
   label: string;

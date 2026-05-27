@@ -26,6 +26,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Formats — public read, admin write
+    match /formats/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Admins — a user can only read their own doc
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;

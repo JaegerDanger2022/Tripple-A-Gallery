@@ -14,7 +14,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { Artwork, Category, FrameOption } from "./types";
+import type { Artwork, Category, FrameOption, FormatOption } from "./types";
 import { ARTWORKS as SEED_ARTWORKS } from "./data";
 
 // ── Collections ─────────────────────────────────────────────────────────────
@@ -22,6 +22,7 @@ import { ARTWORKS as SEED_ARTWORKS } from "./data";
 const artworksCol = () => collection(db, "artworks");
 const categoriesCol = () => collection(db, "categories");
 const framesCol = () => collection(db, "frames");
+const formatsCol = () => collection(db, "formats");
 
 // ── Artworks ─────────────────────────────────────────────────────────────────
 
@@ -127,6 +128,33 @@ export async function deleteFrame(id: string): Promise<void> {
 export async function reorderFrames(ordered: { id: string; order: number }[]): Promise<void> {
   const batch = writeBatch(db);
   ordered.forEach(({ id, order }) => batch.update(doc(db, "frames", id), { order }));
+  await batch.commit();
+}
+
+// ── Formats ──────────────────────────────────────────────────────────────────
+
+export async function getFormats(): Promise<FormatOption[]> {
+  const snap = await getDocs(query(formatsCol(), orderBy("order", "asc")));
+  if (snap.empty) return [];
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as FormatOption));
+}
+
+export async function createFormat(data: Omit<FormatOption, "id">): Promise<string> {
+  const ref = await addDoc(formatsCol(), data);
+  return ref.id;
+}
+
+export async function updateFormat(id: string, data: Partial<Omit<FormatOption, "id">>): Promise<void> {
+  await updateDoc(doc(db, "formats", id), data);
+}
+
+export async function deleteFormat(id: string): Promise<void> {
+  await deleteDoc(doc(db, "formats", id));
+}
+
+export async function reorderFormats(ordered: { id: string; order: number }[]): Promise<void> {
+  const batch = writeBatch(db);
+  ordered.forEach(({ id, order }) => batch.update(doc(db, "formats", id), { order }));
   await batch.commit();
 }
 
