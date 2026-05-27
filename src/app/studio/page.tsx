@@ -64,10 +64,11 @@ export default function ArtistPage() {
           <p className={styles.statement}>{ARTIST.statement}</p>
         </div>
         <div className={styles.portrait}>
-          {/* Placeholder — swap for real photo once available */}
-          <div className={styles.portraitPlaceholder}>
-            <span>AAA</span>
-          </div>
+          <img
+            src="/profile/Ama at work in her studio.png"
+            alt="Ama at work in her studio"
+            style={{ width: "100%", borderRadius: 4, display: "block" }}
+          />
           <div className={styles.portraitCap}>Ama at work in her studio</div>
         </div>
       </section>

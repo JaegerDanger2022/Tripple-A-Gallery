@@ -26,7 +26,6 @@ export default function Header({ query, setQuery }: Props) {
 
   const navLinks = [
     { href: "/", label: "Works" },
-    { href: "/?filter=Print", label: "Editions" },
     { href: "/studio", label: "The Artist" },
     { href: "/contact", label: "Contact" },
   ];
