@@ -15,6 +15,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Admins — a user can only read their own admin doc (to check if they have access)
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
     // Deny everything else
     match /{document=**} {
       allow read, write: if false;

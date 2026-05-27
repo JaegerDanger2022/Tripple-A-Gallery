@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import styles from "./admin.module.css";
 
+type State = "loading" | "unauthenticated" | "checking" | "authorised" | "denied";
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null | "loading">("loading");
+  const [state, setState] = useState<State>("loading");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
@@ -16,7 +19,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (u) => setUser(u));
+    return onAuthStateChanged(auth, async (u: User | null) => {
+      if (!u) { setState("unauthenticated"); return; }
+      setState("checking");
+      const snap = await getDoc(doc(db, "admins", u.uid));
+      setState(snap.exists() ? "authorised" : "denied");
+    });
   }, []);
 
   async function handleSignIn(e: React.FormEvent) {
@@ -33,9 +41,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }
 
-  if (user === "loading") return null;
+  if (state === "loading" || state === "checking") return null;
 
-  if (!user) {
+  if (state === "denied") {
+    return (
+      <div className={styles.gate}>
+        <div className={styles.gateBox}>
+          <div className="kicker">Admin · Tripple A Gallery</div>
+          <h1 className={styles.gateTitle}>Not authorised</h1>
+          <p style={{ fontSize: 14, color: "var(--muted)", margin: 0 }}>
+            Your account doesn't have admin access.
+          </p>
+          <button
+            className="primary"
+            onClick={() => signOut(auth)}
+            style={{ marginTop: 8 }}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (state === "unauthenticated") {
     return (
       <div className={styles.gate}>
         <div className={styles.gateBox}>

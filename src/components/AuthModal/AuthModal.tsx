@@ -16,9 +16,8 @@ export default function AuthModal() {
 
   if (!authModalOpen) return null;
 
-  function reset() { setEmail(""); setPassword(""); setConfirm(""); setErr(""); setMsg(""); }
-
-  function switchMode(m: "signin" | "signup" | "reset") { setMode(m); reset(); }
+  function clear() { setEmail(""); setPassword(""); setConfirm(""); setErr(""); setMsg(""); }
+  function switchMode(m: typeof mode) { setMode(m); clear(); }
 
   function friendlyError(code: string) {
     if (code.includes("user-not-found") || code.includes("wrong-password") || code.includes("invalid-credential")) return "Incorrect email or password.";
@@ -57,11 +56,6 @@ export default function AuthModal() {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button className={styles.close} onClick={closeAuthModal} aria-label="Close">×</button>
 
-        <div className={styles.tabs}>
-          <button className={mode === "signin" ? styles.tabOn : styles.tab} onClick={() => switchMode("signin")}>Sign in</button>
-          <button className={mode === "signup" ? styles.tabOn : styles.tab} onClick={() => switchMode("signup")}>Create account</button>
-        </div>
-
         {mode === "reset" ? (
           <>
             <p className={styles.hint}>Enter your email and we'll send a reset link.</p>
@@ -77,29 +71,35 @@ export default function AuthModal() {
             </form>
           </>
         ) : (
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <label className="field">
-              <span className="field-lbl">Email</span>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
-            </label>
-            <label className="field">
-              <span className="field-lbl">Password</span>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </label>
-            {mode === "signup" && (
+          <>
+            <div className={styles.tabs}>
+              <button className={mode === "signin" ? styles.tabOn : styles.tab} onClick={() => switchMode("signin")}>Sign in</button>
+              <button className={mode === "signup" ? styles.tabOn : styles.tab} onClick={() => switchMode("signup")}>Create account</button>
+            </div>
+            <form className={styles.form} onSubmit={handleSubmit}>
               <label className="field">
-                <span className="field-lbl">Confirm password</span>
-                <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+                <span className="field-lbl">Email</span>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
               </label>
-            )}
-            {err && <p className={styles.err}>{err}</p>}
-            <button type="submit" className="primary" disabled={loading}>
-              {loading ? "…" : mode === "signin" ? "Sign in →" : "Create account →"}
-            </button>
-            {mode === "signin" && (
-              <button type="button" className="ghost" onClick={() => switchMode("reset")}>Forgot password?</button>
-            )}
-          </form>
+              <label className="field">
+                <span className="field-lbl">Password</span>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </label>
+              {mode === "signup" && (
+                <label className="field">
+                  <span className="field-lbl">Confirm password</span>
+                  <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+                </label>
+              )}
+              {err && <p className={styles.err}>{err}</p>}
+              <button type="submit" className="primary" disabled={loading}>
+                {loading ? "…" : mode === "signin" ? "Sign in →" : "Create account →"}
+              </button>
+              {mode === "signin" && (
+                <button type="button" className="ghost" onClick={() => switchMode("reset")}>Forgot password?</button>
+              )}
+            </form>
+          </>
         )}
       </div>
     </div>
