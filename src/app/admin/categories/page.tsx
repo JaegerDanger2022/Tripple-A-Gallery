@@ -184,6 +184,7 @@ export default function CategoriesAdmin() {
           <p style={{ fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--muted)", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>
             Drag rows to reorder
           </p>
+          <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -237,6 +238,7 @@ export default function CategoriesAdmin() {
               ))}
             </tbody>
           </table>
+          </div>
         </>
       )}
 

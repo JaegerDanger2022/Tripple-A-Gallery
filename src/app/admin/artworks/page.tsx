@@ -252,46 +252,48 @@ export default function ArtworksAdmin() {
       ) : artworks.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No artworks yet. Add one above.</p>
       ) : (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th style={{ width: 40 }}>#</th>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Year</th>
-              <th>Price</th>
-              <th>Edition</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {artworks.map((a, i) => (
-              <tr key={a.id}>
-                <td style={{ color: "var(--muted)", fontFamily: "var(--f-mono)", fontSize: 11 }}>{a.order ?? i}</td>
-                <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span
-                      className={styles.swatch}
-                      style={{ background: a.color }}
-                    />
-                    <span style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>Lot {a.lotNumber}</span>
-                    {a.title && <span style={{ fontFamily: "var(--f-display)", fontSize: 13, color: "var(--muted)" }}><em>{a.title}</em></span>}
-                  </div>
-                </td>
-                <td><span className={styles.badge}>{a.category}</span></td>
-                <td style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>{a.year}</td>
-                <td style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>£{a.price.toLocaleString()}</td>
-                <td style={{ fontSize: 12, color: "var(--muted)" }}>{a.edition}</td>
-                <td>
-                  <div className={styles.actions}>
-                    <button className={styles.btnEdit} onClick={() => openEdit(a)}>Edit</button>
-                    <button className={styles.btnDelete} onClick={() => handleDelete(a.id, a.lotNumber)}>Delete</button>
-                  </div>
-                </td>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }}>#</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Year</th>
+                <th>Price</th>
+                <th>Edition</th>
+                <th />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {artworks.map((a, i) => (
+                <tr key={a.id}>
+                  <td style={{ color: "var(--muted)", fontFamily: "var(--f-mono)", fontSize: 11 }}>{a.order ?? i}</td>
+                  <td>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span
+                        className={styles.swatch}
+                        style={{ background: a.color }}
+                      />
+                      <span style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>Lot {a.lotNumber}</span>
+                      {a.title && <span style={{ fontFamily: "var(--f-display)", fontSize: 13, color: "var(--muted)" }}><em>{a.title}</em></span>}
+                    </div>
+                  </td>
+                  <td><span className={styles.badge}>{a.category}</span></td>
+                  <td style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>{a.year}</td>
+                  <td style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>£{a.price.toLocaleString()}</td>
+                  <td style={{ fontSize: 12, color: "var(--muted)" }}>{a.edition}</td>
+                  <td>
+                    <div className={styles.actions}>
+                      <button className={styles.btnEdit} onClick={() => openEdit(a)}>Edit</button>
+                      <button className={styles.btnDelete} onClick={() => handleDelete(a.id, a.lotNumber)}>Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {drawerData && (
