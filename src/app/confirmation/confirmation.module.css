@@ -12,6 +12,7 @@
   gap: 24px; padding: 28px 0;
   border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
 }
+@media (max-width: 500px) { .meta { grid-template-columns: 1fr 1fr; } }
 .meta > div { display: flex; flex-direction: column; gap: 4px; }
 .meta dt { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
 .meta dd { font-family: var(--f-display); font-size: 22px; margin: 0; letter-spacing: -0.01em; }

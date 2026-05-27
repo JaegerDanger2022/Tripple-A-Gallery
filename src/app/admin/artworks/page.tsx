@@ -7,6 +7,7 @@ import styles from "../admin.module.css";
 
 // ── Blank artwork for "add" mode ─────────────────────────────────────────────
 const BLANK: Omit<Artwork, "id"> = {
+  lotNumber: "",
   title: "",
   year: new Date().getFullYear(),
   medium: "",
@@ -64,17 +65,23 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
         </div>
 
         <form className={styles.drawerBody} onSubmit={handleSubmit} id="artwork-form">
-          {/* Title */}
-          <div className={styles.fld}>
-            <label className={styles.fldLbl}>Title</label>
-            <input className={styles.fldInput} required value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Field Study No. 4" />
+          {/* Lot number */}
+          <div className={styles.fldRow}>
+            <div className={styles.fld}>
+              <label className={styles.fldLbl}>Lot number</label>
+              <input className={styles.fldInput} required value={form.lotNumber} onChange={(e) => set("lotNumber", e.target.value)} placeholder="e.g. AAA1, TA4" style={{ fontFamily: "var(--f-mono)" }} />
+            </div>
+            <div className={styles.fld}>
+              <label className={styles.fldLbl}>Title <span style={{ fontWeight: 400, opacity: 0.5 }}>(optional)</span></label>
+              <input className={styles.fldInput} value={form.title ?? ""} onChange={(e) => set("title", e.target.value)} placeholder="Leave blank — viewer names it" />
+            </div>
           </div>
 
           {/* Category & Series */}
           <div className={styles.fldRow}>
             <div className={styles.fld}>
               <label className={styles.fldLbl}>Category</label>
-              <select className={styles.fldSelect} required value={form.category} onChange={(e) => set("category", e.target.value)}>
+              <select className={styles.fldSelect} value={form.category} onChange={(e) => set("category", e.target.value)}>
                 <option value="">Select…</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.name}>{c.name}</option>
@@ -82,8 +89,8 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
               </select>
             </div>
             <div className={styles.fld}>
-              <label className={styles.fldLbl}>Series</label>
-              <input className={styles.fldInput} required value={form.series} onChange={(e) => set("series", e.target.value)} placeholder="e.g. Field Studies" />
+              <label className={styles.fldLbl}>Series <span style={{ fontWeight: 400, opacity: 0.5 }}>(optional)</span></label>
+              <input className={styles.fldInput} value={form.series ?? ""} onChange={(e) => set("series", e.target.value)} placeholder="e.g. AAA series" />
             </div>
           </div>
 
@@ -91,7 +98,7 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
           <div className={styles.fldRow}>
             <div className={styles.fld}>
               <label className={styles.fldLbl}>Year</label>
-              <input className={styles.fldInput} type="number" required value={form.year} onChange={(e) => set("year", Number(e.target.value))} />
+              <input className={styles.fldInput} type="number" value={form.year ?? ""} onChange={(e) => set("year", Number(e.target.value))} placeholder="e.g. 2024" />
             </div>
             <div className={styles.fld}>
               <label className={styles.fldLbl}>Price (£)</label>
@@ -102,7 +109,7 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
           {/* Medium & Dimensions */}
           <div className={styles.fld}>
             <label className={styles.fldLbl}>Medium</label>
-            <input className={styles.fldInput} required value={form.medium} onChange={(e) => set("medium", e.target.value)} placeholder="e.g. Oil on linen" />
+            <input className={styles.fldInput} value={form.medium ?? ""} onChange={(e) => set("medium", e.target.value)} placeholder="e.g. Mixed media, collage" />
           </div>
           <div className={styles.fldRow}>
             <div className={styles.fld}>
@@ -118,7 +125,7 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
           {/* Description */}
           <div className={styles.fld}>
             <label className={styles.fldLbl}>Description (blurb)</label>
-            <textarea className={styles.fldTextarea} rows={4} required value={form.blurb} onChange={(e) => set("blurb", e.target.value)} placeholder="One or two sentences about the work." />
+            <textarea className={styles.fldTextarea} rows={4} value={form.blurb ?? ""} onChange={(e) => set("blurb", e.target.value)} placeholder="Optional — viewer names the work." />
           </div>
 
           {/* Image URL */}
@@ -267,7 +274,8 @@ export default function ArtworksAdmin() {
                       className={styles.swatch}
                       style={{ background: a.color }}
                     />
-                    <span style={{ fontFamily: "var(--f-display)", fontSize: 16 }}><em>{a.title}</em></span>
+                    <span style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>Lot {a.lotNumber}</span>
+                    {a.title && <span style={{ fontFamily: "var(--f-display)", fontSize: 13, color: "var(--muted)" }}><em>{a.title}</em></span>}
                   </div>
                 </td>
                 <td><span className={styles.badge}>{a.category}</span></td>
@@ -277,7 +285,7 @@ export default function ArtworksAdmin() {
                 <td>
                   <div className={styles.actions}>
                     <button className={styles.btnEdit} onClick={() => openEdit(a)}>Edit</button>
-                    <button className={styles.btnDelete} onClick={() => handleDelete(a.id, a.title)}>Delete</button>
+                    <button className={styles.btnDelete} onClick={() => handleDelete(a.id, a.lotNumber)}>Delete</button>
                   </div>
                 </td>
               </tr>

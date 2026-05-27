@@ -38,13 +38,14 @@ export default function BrowsePage() {
       const q = query.toLowerCase();
       list = list.filter(
         (a) =>
-          a.title.toLowerCase().includes(q) ||
-          a.medium.toLowerCase().includes(q) ||
-          a.series.toLowerCase().includes(q)
+          a.lotNumber.toLowerCase().includes(q) ||
+          (a.title ?? "").toLowerCase().includes(q) ||
+          (a.medium ?? "").toLowerCase().includes(q) ||
+          (a.series ?? "").toLowerCase().includes(q)
       );
     }
-    if (sort === "recent") list.sort((a, b) => b.year - a.year);
-    else if (sort === "series") list.sort((a, b) => a.series.localeCompare(b.series));
+    if (sort === "recent") list.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+    else if (sort === "series") list.sort((a, b) => (a.series ?? "").localeCompare(b.series ?? ""));
     else list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     return list;
   }, [artworks, filter, query, sort]);
@@ -59,19 +60,19 @@ export default function BrowsePage() {
       {/* Hero */}
       <section className={styles.hero}>
         <div className={styles.heroMeta}>
-          <div className="kicker">Recent works · Vol. 07</div>
-          <div className={styles.heroDates}>26 May — 14 Aug 2026</div>
+          <div className="kicker">Tripple A Gallery</div>
+          <div className={styles.heroDates}>Ama Antwiwaa Amponsah</div>
         </div>
         <h1 className={styles.heroTitle}>
-          A quiet rotation of <em>recent works</em>,<br />
-          on paper, on linen, on light.
+          Portraits, collage &amp; <em>mixed-media works</em>,<br />
+          layered with colour, texture, and feeling.
         </h1>
         <div className={styles.heroFoot}>
           <span>{artworks.length} works</span>
           <span className={styles.dot} />
           <span>{series.length} series</span>
           <span className={styles.dot} />
-          <span>Studio, {ARTIST.based}</span>
+          <span>{ARTIST.based}</span>
         </div>
       </section>
 

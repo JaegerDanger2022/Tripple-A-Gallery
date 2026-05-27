@@ -4,6 +4,7 @@
   padding: 80px var(--pad) 56px; border-bottom: 1px solid var(--line);
   display: grid; grid-template-columns: 1fr; gap: 32px;
 }
+@media (max-width: 640px) { .hero { padding: 48px var(--pad) 36px; } }
 .heroTitle {
   font-family: var(--f-display); font-weight: 400;
   font-size: clamp(40px, 6.4vw, 96px); line-height: 0.98;

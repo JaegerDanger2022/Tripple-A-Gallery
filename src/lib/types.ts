@@ -1,16 +1,17 @@
 export interface Artwork {
   id: string;
-  title: string;
-  year: number;
-  medium: string;
-  dimensions: string;
-  edition: string;
+  lotNumber: string;       // e.g. "AAA1", "TA4", "Tripple A 1" — viewer names the work
+  title?: string;          // optional curator label, rarely used
+  year?: number;
+  medium?: string;
+  dimensions?: string;
+  edition?: string;
   price: number;
   category: string;        // dynamic — matches Category.name
   color: string;
   accent: string;
-  series: string;
-  blurb: string;
+  series?: string;
+  blurb?: string;
   imageUrl?: string;
   order?: number;          // for custom sort in browse
 }

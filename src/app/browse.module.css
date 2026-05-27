@@ -8,6 +8,9 @@
   grid-template-columns: 1fr;
   gap: 32px;
 }
+@media (max-width: 640px) {
+  .hero { padding: 48px var(--pad) 36px; }
+}
 .heroMeta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
 .heroDates { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; }
 .heroTitle {
@@ -30,13 +33,17 @@
 
 /* Filter rail */
 .rail {
-  position: sticky; top: 72px; z-index: 20;
+  position: sticky; top: 56px; z-index: 20;
   display: flex; justify-content: space-between; align-items: center;
   gap: 16px; padding: 14px var(--pad);
   background: color-mix(in oklab, var(--bg) 92%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
+}
+@media (max-width: 768px) {
+  .rail { flex-direction: column; align-items: stretch; gap: 10px; top: 52px; }
+  .railSort { justify-content: flex-end; }
 }
 .railCats { display: flex; flex-wrap: wrap; gap: 6px; }
 .railCats button {
@@ -77,6 +84,7 @@
 }
 @media (max-width: 640px) {
   .grid, .grid-compact, .grid-spacious { grid-template-columns: 1fr; }
+  .grid, .grid-compact, .grid-spacious { padding: 32px var(--pad) 56px; }
 }
 
 /* Empty state */

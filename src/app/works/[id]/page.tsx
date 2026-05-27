@@ -43,7 +43,7 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const total = v.price + (frame === "oak" ? 120 : frame === "black" ? 140 : 0);
 
   const related = artworks
-    .filter((x) => x.id !== a.id && (x.series === a.series || x.category === a.category))
+    .filter((x) => x.id !== a.id && ((a.series && x.series === a.series) || x.category === a.category))
     .slice(0, 3);
 
   function reveal() {
@@ -70,9 +70,8 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
       <nav className={styles.crumbs}>
         <a onClick={() => router.push("/")}>Works</a>
         <span>/</span>
-        <a onClick={() => router.push(`/?filter=${encodeURIComponent(a.category)}`)}>{a.category}</a>
-        <span>/</span>
-        <span className={styles.current}>{a.series}</span>
+        {a.category && <><a onClick={() => router.push(`/?filter=${encodeURIComponent(a.category)}`)}>{a.category}</a><span>/</span></>}
+        <span className={styles.current}>Lot {a.lotNumber}</span>
       </nav>
 
       <div className={styles.grid}>
@@ -88,14 +87,14 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
         </div>
 
         <aside className={styles.info}>
-          <div className="kicker">{a.category} · {a.year} · {a.series}</div>
-          <h1 className={styles.title}><em>{a.title}</em></h1>
-          <p className={styles.blurb}>{a.blurb}</p>
+          <div className="kicker">{[a.category, a.year, a.series].filter(Boolean).join(" · ")}</div>
+          <h1 className={styles.title}>Lot <em>{a.lotNumber}</em></h1>
+          {a.blurb && <p className={styles.blurb}>{a.blurb}</p>}
 
           <dl className={styles.specs}>
-            <div><dt>Medium</dt><dd>{a.medium}</dd></div>
-            <div><dt>Dimensions</dt><dd>{a.dimensions}</dd></div>
-            <div><dt>Edition</dt><dd>{a.edition}</dd></div>
+            {a.medium && <div><dt>Medium</dt><dd>{a.medium}</dd></div>}
+            {a.dimensions && <div><dt>Dimensions</dt><dd>{a.dimensions}</dd></div>}
+            {a.edition && <div><dt>Edition</dt><dd>{a.edition}</dd></div>}
             <div><dt>Signed</dt><dd>Yes, verso</dd></div>
             <div><dt>Ships from</dt><dd>{ARTIST.based}</dd></div>
           </dl>

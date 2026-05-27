@@ -1,0 +1,22 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyAD0aNqm6mJyJV40TFIz5LtipRIs6j0tyc
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: tripple-a-gallery.firebaseapp.com
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: tripple-a-gallery
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: tripple-a-gallery.firebasestorage.app
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "900118498830"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:900118498830:web:0140f0e162204ea328b65f
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: G-T5Y0DF8H2P

@@ -19,12 +19,12 @@ export default function ArtworkCard({ artwork: a, idx, onOpen }: Props) {
       <ArtPlaceholder artwork={a} ratio={ratio} />
       <div className={styles.meta}>
         <div className={styles.top}>
-          <span className={styles.title}><em>{a.title}</em></span>
-          <span className={styles.year}>{a.year}</span>
+          <span className={styles.title}>Lot {a.lotNumber}</span>
+          {a.year && <span className={styles.year}>{a.year}</span>}
         </div>
         <div className={styles.bottom}>
-          <span className={styles.medium}>{a.medium}</span>
-          <span className={styles.series}>{a.series}</span>
+          {a.medium && <span className={styles.medium}>{a.medium}</span>}
+          {a.category && <span className={styles.series}>{a.category}</span>}
         </div>
       </div>
     </article>

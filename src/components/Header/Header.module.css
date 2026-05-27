@@ -12,16 +12,18 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 24px;
-  padding: 18px var(--pad);
+  padding: 16px var(--pad);
 }
 .brand { display: inline-flex; align-items: baseline; gap: 8px; cursor: pointer; }
 .brandName {
   font-family: var(--f-display);
-  font-size: 22px;
+  font-size: clamp(17px, 3vw, 22px);
   letter-spacing: -0.01em;
   line-height: 1;
 }
 .brandName em { color: var(--accent); font-style: italic; }
+
+/* Desktop nav */
 .nav {
   display: flex;
   gap: 28px;
@@ -35,13 +37,14 @@
 .nav .on::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
+  left: 0; right: 0; bottom: -1px;
   height: 1px;
   background: var(--ink);
 }
-.right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+
+.right { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+
+/* Search */
 .search {
   display: flex;
   align-items: center;
@@ -49,7 +52,7 @@
   background: color-mix(in oklab, var(--ink) 5%, transparent);
   border-radius: 999px;
   padding: 7px 14px;
-  width: 220px;
+  width: 180px;
   color: var(--muted);
   border: 1px solid transparent;
   transition: border-color 0.18s, background 0.18s, width 0.25s ease;
@@ -57,37 +60,82 @@
 .search:focus-within {
   border-color: var(--line);
   background: var(--surface);
-  width: 260px;
+  width: 220px;
 }
 .search input {
-  flex: 1;
-  border: 0;
-  background: transparent;
-  outline: none;
-  font-size: 13px;
-  color: var(--ink);
+  flex: 1; border: 0; background: transparent; outline: none;
+  font-size: 13px; color: var(--ink); min-width: 0;
 }
 .search input::placeholder { color: var(--muted); }
+
+/* Cart */
 .cartBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 13px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px;
+  font-size: 13px; white-space: nowrap;
   transition: background 0.15s, border-color 0.15s;
 }
 .cartBtn:hover { border-color: var(--ink); background: color-mix(in oklab, var(--ink) 4%, transparent); }
 .cartCount {
-  display: inline-grid;
-  place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: var(--ink);
-  color: var(--bg);
-  font-family: var(--f-mono);
-  font-size: 10px;
+  display: inline-grid; place-items: center;
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--f-mono); font-size: 10px;
+}
+
+/* Hamburger — hidden on desktop */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  padding: 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.burger:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); }
+.burger span {
+  display: block; height: 1.5px;
+  background: var(--ink); border-radius: 2px;
+  transition: transform 0.25s, opacity 0.2s;
+}
+.burgerOpen span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.burgerOpen span:nth-child(2) { opacity: 0; }
+.burgerOpen span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* Mobile nav drawer */
+.mobileNav {
+  display: none;
+  flex-direction: column;
+  padding: 16px var(--pad) 20px;
+  border-top: 1px solid var(--line);
+  gap: 2px;
+  background: color-mix(in oklab, var(--bg) 96%, transparent);
+  backdrop-filter: blur(18px);
+}
+.mobileNav a {
+  padding: 12px 4px;
+  font-size: 15px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  transition: color 0.15s;
+}
+.mobileNav a:last-child { border-bottom: 0; }
+.mobileNav a:hover, .mobileNav .on { color: var(--ink); }
+.mobileSearch {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; margin-top: 8px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface);
+}
+.mobileSearch input { flex: 1; border: 0; background: transparent; outline: none; font-size: 14px; }
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 768px) {
+  .inner { grid-template-columns: 1fr auto; }
+  .nav { display: none; }
+  .search { display: none; }
+  .burger { display: flex; }
+  .mobileNavOpen { display: flex; }
 }

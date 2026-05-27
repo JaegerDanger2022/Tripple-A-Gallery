@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Artwork } from "@/lib/types";
 import styles from "./ArtPlaceholder.module.css";
 
@@ -12,6 +13,25 @@ interface Props {
 
 export default function ArtPlaceholder({ artwork: a, ratio = "portrait", showLabel = true, style }: Props) {
   const ar = ratio === "landscape" ? "4 / 3" : ratio === "square" ? "1 / 1" : "3 / 4";
+  const [imgError, setImgError] = useState(false);
+
+  if (a.imageUrl && !imgError) {
+    return (
+      <div className={styles.ph} style={{ aspectRatio: ar, background: a.color, ...style }}>
+        <img
+          src={a.imageUrl}
+          alt={`Lot ${a.lotNumber}`}
+          className={styles.img}
+          onError={() => setImgError(true)}
+        />
+        {showLabel && (
+          <div className={styles.lotBadge}>Lot {a.lotNumber}</div>
+        )}
+      </div>
+    );
+  }
+
+  // Colour placeholder fallback
   const stripeId = `s-${a.id}-${ratio}`;
   return (
     <div className={styles.ph} style={{ aspectRatio: ar, background: a.color, ...style }}>
@@ -26,8 +46,7 @@ export default function ArtPlaceholder({ artwork: a, ratio = "portrait", showLab
       </svg>
       {showLabel && (
         <div className={styles.label} style={{ color: a.accent }}>
-          <span>IMG · {a.id.toUpperCase()}</span>
-          <span>{a.dimensions}</span>
+          <span>Lot {a.lotNumber}</span>
         </div>
       )}
     </div>

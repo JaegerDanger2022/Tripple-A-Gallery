@@ -13,7 +13,7 @@
 }
 .meta { display: flex; flex-direction: column; gap: 6px; }
 .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.title { font-family: var(--f-display); font-size: 20px; line-height: 1.15; letter-spacing: -0.01em; }
+.title { font-family: var(--f-display); font-size: clamp(16px, 2.8vw, 20px); line-height: 1.15; letter-spacing: -0.01em; }
 .year { font-family: var(--f-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.05em; flex-shrink: 0; }
 .bottom {
   display: flex;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./admin.module.css";
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "atelier-admin";
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "tripple-a-admin";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [authed, setAuthed] = useState(false);
@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className={styles.gate}>
         <div className={styles.gateBox}>
-          <div className="kicker">Admin · Atelier</div>
+          <div className="kicker">Admin · Tripple A Gallery</div>
           <h1 className={styles.gateTitle}>Studio access</h1>
           <form
             className={styles.gateForm}
@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className="kicker">Admin</div>
-          <span className={styles.sidebarTitle}>Studio</span>
+          <span className={styles.sidebarTitle}>Tripple A Gallery</span>
         </div>
         <nav className={styles.sidebarNav}>
           <Link href="/admin/artworks" className={pathname.startsWith("/admin/artworks") ? styles.active : ""}>

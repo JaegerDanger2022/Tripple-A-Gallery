@@ -1,4 +1,4 @@
-/* globals.css — Atelier gallery design system */
+/* globals.css — Tripple A Gallery design system */
 
 :root {
   --f-display: var(--font-instrument), var(--font-cormorant), Georgia, serif;
@@ -14,6 +14,11 @@
   --pad: 40px;
   --gap: 40px;
   --grid-gap: 40px;
+}
+
+/* Mobile spacing */
+@media (max-width: 640px) {
+  :root { --pad: 20px; --gap: 20px; --grid-gap: 20px; }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,10 +49,15 @@ ul, ol, li, dl, dd, dt { list-style: none; }
 [data-density="compact"]  { --pad: 24px;  --gap: 28px; --grid-gap: 28px; }
 [data-density="regular"]  { --pad: 40px;  --gap: 40px; --grid-gap: 40px; }
 [data-density="spacious"] { --pad: 64px;  --gap: 64px; --grid-gap: 56px; }
+@media (max-width: 640px) {
+  [data-density="compact"]  { --pad: 16px; --gap: 16px; --grid-gap: 16px; }
+  [data-density="regular"]  { --pad: 20px; --gap: 20px; --grid-gap: 20px; }
+  [data-density="spacious"] { --pad: 24px; --gap: 24px; --grid-gap: 24px; }
+}
 
 /* Shared button primitives */
 .primary {
-  padding: 14px 22px;
+  padding: 12px 20px;
   background: var(--ink); color: var(--bg);
   border-radius: 4px;
   font-size: 14px;
@@ -81,8 +91,9 @@ ul, ol, li, dl, dd, dt { list-style: none; }
 }
 .field.err input { border-color: var(--accent); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 .form-note { font-size: 12px; color: var(--muted); margin: 0; }
-.form-actions { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.form-actions { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
 
 /* Scrollbar polish */
 ::-webkit-scrollbar { width: 12px; }
