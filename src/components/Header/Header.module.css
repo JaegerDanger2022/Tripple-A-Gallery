@@ -148,6 +148,7 @@
   .inner { grid-template-columns: 1fr auto; }
   .nav { display: none; }
   .search { display: none; }
+  .accountBtn { display: none; }
   .burger { display: flex; }
   .mobileNavOpen { display: flex; }
 }
