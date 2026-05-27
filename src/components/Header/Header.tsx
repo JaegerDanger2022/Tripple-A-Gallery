@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { ARTIST } from "@/lib/data";
 import styles from "./Header.module.css";
 
@@ -14,6 +15,7 @@ interface Props {
 
 export default function Header({ query, setQuery }: Props) {
   const { cartCount, setCartOpen, revealedArtworks } = useApp();
+  const { user, openAuthModal, signOut } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -63,6 +65,20 @@ export default function Header({ query, setQuery }: Props) {
             </button>
           )}
 
+          {user ? (
+            <button className={styles.accountBtn} onClick={() => signOut()} title={user.email ?? ""}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+            </button>
+          ) : (
+            <button className={styles.accountBtn} onClick={() => openAuthModal("signin")} title="Sign in">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+              </svg>
+            </button>
+          )}
+
           {/* Hamburger */}
           <button
             className={`${styles.burger} ${menuOpen ? styles.burgerOpen : ""}`}
@@ -87,6 +103,21 @@ export default function Header({ query, setQuery }: Props) {
             style={{ textAlign: "left", padding: "12px 4px", fontSize: 15, color: "var(--ink)", borderBottom: "1px solid var(--line)" }}
           >
             Cart ({cartCount})
+          </button>
+        )}
+        {user ? (
+          <button
+            onClick={() => { signOut(); setMenuOpen(false); }}
+            style={{ textAlign: "left", padding: "12px 4px", fontSize: 14, color: "var(--muted)", borderBottom: "1px solid var(--line)" }}
+          >
+            Sign out ({user.email})
+          </button>
+        ) : (
+          <button
+            onClick={() => { openAuthModal("signin"); setMenuOpen(false); }}
+            style={{ textAlign: "left", padding: "12px 4px", fontSize: 14, color: "var(--muted)", borderBottom: "1px solid var(--line)" }}
+          >
+            Sign in / Create account
           </button>
         )}
         <div className={styles.mobileSearch}>

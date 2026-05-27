@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { ARTWORKS } from "@/lib/data";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import styles from "./checkout.module.css";
@@ -35,12 +36,17 @@ function Field({ label, value, onChange, placeholder, error, type = "text" }: Fi
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useApp();
+  const { user } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     email: "", name: "", address1: "", address2: "", city: "",
     postal: "", country: "United Kingdom", card: "", exp: "", cvc: "",
   });
+
+  useEffect(() => {
+    if (user?.email) setForm((f) => ({ ...f, email: f.email || user.email! }));
+  }, [user]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);

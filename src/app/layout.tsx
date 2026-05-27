@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Instrument_Serif, Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
+import { AuthProvider } from "@/context/AuthContext";
+import AuthModal from "@/components/AuthModal/AuthModal";
 import AppShell from "@/components/AppShell/AppShell";
 
 const instrumentSerif = Instrument_Serif({
@@ -43,9 +45,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${instrumentSerif.variable} ${cormorant.variable} ${geist.variable} ${geistMono.variable}`}>
       <body>
-        <AppProvider>
-          <AppShell>{children}</AppShell>
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            <AppShell>{children}</AppShell>
+            <AuthModal />
+          </AppProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -83,6 +83,14 @@
   font-family: var(--f-mono); font-size: 10px;
 }
 
+/* Account button */
+.accountBtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  color: var(--muted); transition: background 0.15s, color 0.15s;
+}
+.accountBtn:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); color: var(--ink); }
+
 /* Hamburger — hidden on desktop */
 .burger {
   display: none;
