@@ -85,6 +85,35 @@
 @media (max-width: 640px) { .videoSection { padding: 48px var(--pad); } }
 .videoLabel { display: flex; flex-direction: column; gap: 4px; }
 
+/* Artist at Work video grid */
+.videoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 80px var(--pad);
+  border-bottom: 1px solid var(--line);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 640px) { .videoGrid { padding: 48px var(--pad); } }
+.videoGridLabel { display: flex; flex-direction: column; gap: 4px; }
+.videoGridRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  /* cap height so portrait videos don't tower — cards stay proportional */
+  max-width: 840px;
+}
+@media (max-width: 900px) {
+  .videoGridRow {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 100%;
+  }
+}
+@media (max-width: 600px) { .videoGridRow { grid-template-columns: 1fr; max-width: 360px; } }
+
 /* Slideshow section */
 .slideshowSection {
   display: flex;

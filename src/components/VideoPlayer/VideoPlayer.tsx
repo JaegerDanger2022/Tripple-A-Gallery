@@ -6,9 +6,10 @@ import styles from "./VideoPlayer.module.css";
 interface Props {
   src: string;
   label?: string;
+  aspectRatio?: string;
 }
 
-export default function VideoPlayer({ src, label }: Props) {
+export default function VideoPlayer({ src, label, aspectRatio }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -20,7 +21,7 @@ export default function VideoPlayer({ src, label }: Props) {
   }
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} style={aspectRatio ? { aspectRatio } : undefined}>
       <video
         ref={videoRef}
         className={styles.video}
