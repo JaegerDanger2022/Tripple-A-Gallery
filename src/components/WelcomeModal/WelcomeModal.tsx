@@ -40,7 +40,7 @@ export default function WelcomeModal() {
         </div>
 
         <div className={styles.videoWrap}>
-          <VideoPlayer src="/profile/video.mp4" label="Watch the artist at work" />
+          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/video.mp4" label="Watch the artist at work" />
         </div>
 
         <div className={styles.ft}>

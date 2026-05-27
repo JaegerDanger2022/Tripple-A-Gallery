@@ -40,6 +40,9 @@ yarn-error.log*
 .firebase/
 firebase-debug.log*
 
+# video files — served from Firebase Storage, not git
+public/profile/*.mp4
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
