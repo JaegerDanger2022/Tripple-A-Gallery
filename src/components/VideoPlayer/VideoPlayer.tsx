@@ -1,0 +1,40 @@
+"use client";
+
+import { useRef, useState } from "react";
+import styles from "./VideoPlayer.module.css";
+
+interface Props {
+  src: string;
+  label?: string;
+}
+
+export default function VideoPlayer({ src, label }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  function toggle() {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); }
+    else          { v.pause(); setPlaying(false); }
+  }
+
+  return (
+    <div className={styles.wrap}>
+      <video
+        ref={videoRef}
+        className={styles.video}
+        src={src}
+        playsInline
+        onEnded={() => setPlaying(false)}
+        onClick={toggle}
+      />
+      {!playing && (
+        <button className={styles.play} onClick={toggle} aria-label="Play video">
+          <span className={styles.playIcon}>▶</span>
+          {label && <span className={styles.playLabel}>{label}</span>}
+        </button>
+      )}
+    </div>
+  );
+}

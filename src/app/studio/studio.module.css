@@ -69,6 +69,22 @@
   font-style: italic;
 }
 
+/* Video section */
+.videoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 80px var(--pad);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 640px) { .videoSection { padding: 48px var(--pad); } }
+.videoLabel { display: flex; flex-direction: column; gap: 4px; }
+
 /* Slideshow section */
 .slideshowSection {
   display: flex;

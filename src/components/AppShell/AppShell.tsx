@@ -5,6 +5,7 @@ import { useApp } from "@/context/AppContext";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import CartDrawer from "@/components/CartDrawer/CartDrawer";
+import WelcomeModal from "@/components/WelcomeModal/WelcomeModal";
 import TweaksPanel from "@/components/TweaksPanel/TweaksPanel";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       <Footer />
       <CartDrawer />
+      <WelcomeModal />
       {process.env.NODE_ENV === "development" && <TweaksPanel />}
     </div>
   );

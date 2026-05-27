@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ARTIST } from "@/lib/data";
+import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
 import styles from "./studio.module.css";
 
 const NUM_SLIDES = 8;
@@ -76,6 +77,14 @@ export default function ArtistPage() {
       {/* Bio */}
       <section className={styles.bio}>
         {ARTIST.bio.map((p, i) => <p key={i}>{p}</p>)}
+      </section>
+
+      {/* Video */}
+      <section className={styles.videoSection}>
+        <div className={styles.videoLabel}>
+          <div className="kicker">Film · the artist at work</div>
+        </div>
+        <VideoPlayer src="/profile/video.mp4" label="Watch" />
       </section>
 
       {/* Profile slideshow */}
