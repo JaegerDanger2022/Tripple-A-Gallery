@@ -1,0 +1,51 @@
+.page { padding-bottom: 80px; }
+
+.hero {
+  padding: 80px var(--pad) 56px;
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 640px) { .hero { padding: 48px var(--pad) 36px; } }
+
+.heroTitle {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(40px, 6.4vw, 96px); line-height: 0.98;
+  letter-spacing: -0.02em; margin: 16px 0 0; max-width: 20ch; text-wrap: pretty;
+}
+.heroTitle em { font-style: italic; color: var(--accent); }
+
+.body {
+  max-width: 680px;
+  padding: 56px var(--pad) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.section h2 {
+  font-family: var(--f-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 16px;
+}
+.section p {
+  font-size: 15px; line-height: 1.65; color: var(--ink);
+  margin: 0 0 12px; max-width: 64ch; text-wrap: pretty;
+}
+.section p:last-child { margin-bottom: 0; }
+.section ul {
+  margin: 12px 0; padding-left: 20px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.section ul li { font-size: 15px; line-height: 1.5; color: var(--ink); }
+.section a { color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.section a:hover { border-color: var(--ink); }
+
+.cta {
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.cta p { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+.ctaLink {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em;
+  color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 2px;
+}
+.ctaLink:hover { opacity: 0.6; }

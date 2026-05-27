@@ -1,0 +1,27 @@
+.page { padding-bottom: 80px; }
+
+.hero {
+  padding: 80px var(--pad) 56px;
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 640px) { .hero { padding: 48px var(--pad) 36px; } }
+
+.heroTitle {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(40px, 6.4vw, 96px); line-height: 0.98;
+  letter-spacing: -0.02em; margin: 16px 0 0;
+}
+
+.body {
+  padding: 56px var(--pad) 0;
+  display: flex; flex-direction: column; gap: 24px;
+}
+
+.coming { font-size: 15px; color: var(--muted); max-width: 52ch; margin: 0; }
+
+.ctaLink {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.06em;
+  color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 2px;
+  width: fit-content;
+}
+.ctaLink:hover { opacity: 0.6; }
