@@ -85,11 +85,15 @@
 
 /* Account button */
 .accountBtn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
-  color: var(--muted); transition: background 0.15s, color 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  font-size: 13px; color: var(--muted);
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
-.accountBtn:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); color: var(--ink); }
+.accountBtn:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); color: var(--ink); border-color: var(--line); }
+.accountName { font-size: 13px; }
 
 /* Hamburger — hidden on desktop */
 .burger {
