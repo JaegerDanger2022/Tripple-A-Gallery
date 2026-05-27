@@ -1,47 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import styles from "./admin.module.css";
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "tripple-a-admin";
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [authed, setAuthed] = useState(false);
-  const [pw, setPw] = useState("");
-  const [err, setErr] = useState(false);
+  const [user, setUser] = useState<User | null | "loading">("loading");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const pathname = usePathname();
 
-  if (!authed) {
+  useEffect(() => {
+    return onAuthStateChanged(auth, (u) => setUser(u));
+  }, []);
+
+  async function handleSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    setSubmitting(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch {
+      setErr("Incorrect email or password.");
+      setPassword("");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (user === "loading") return null;
+
+  if (!user) {
     return (
       <div className={styles.gate}>
         <div className={styles.gateBox}>
           <div className="kicker">Admin · Tripple A Gallery</div>
           <h1 className={styles.gateTitle}>Studio access</h1>
-          <form
-            className={styles.gateForm}
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (pw === ADMIN_PASSWORD) {
-                setAuthed(true);
-                setErr(false);
-              } else {
-                setErr(true);
-                setPw("");
-              }
-            }}
-          >
+          <form className={styles.gateForm} onSubmit={handleSignIn}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              autoFocus
+              required
+              onChange={(e) => { setEmail(e.target.value); setErr(""); }}
+              className={err ? styles.inputErr : ""}
+            />
             <input
               type="password"
               placeholder="Password"
-              value={pw}
-              autoFocus
-              onChange={(e) => { setPw(e.target.value); setErr(false); }}
+              value={password}
+              required
+              onChange={(e) => { setPassword(e.target.value); setErr(""); }}
               className={err ? styles.inputErr : ""}
             />
-            {err && <p className={styles.errMsg}>Incorrect password.</p>}
-            <button type="submit" className="primary">Enter →</button>
+            {err && <p className={styles.errMsg}>{err}</p>}
+            <button type="submit" className="primary" disabled={submitting}>
+              {submitting ? "Signing in…" : "Sign in →"}
+            </button>
           </form>
         </div>
       </div>
@@ -65,6 +86,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
         <div className={styles.sidebarFooter}>
           <Link href="/" className={styles.backLink}>← Back to gallery</Link>
+          <button
+            onClick={() => signOut(auth)}
+            style={{ marginTop: 12, fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--muted)", letterSpacing: "0.06em" }}
+          >
+            Sign out
+          </button>
         </div>
       </aside>
       <main className={styles.content}>{children}</main>
