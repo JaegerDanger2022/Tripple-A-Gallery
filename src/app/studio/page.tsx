@@ -21,29 +21,29 @@ function ProfileSlideshow() {
   return (
     <div className={styles.slideshow}>
       <div className={styles.slideImgWrap} key={idx}>
-        {/* Plain img avoids Next.js /_next/image cache */}
         <img
           src={`${SLIDES[idx].src}?v=2`}
           alt={SLIDES[idx].alt}
           className={styles.slideImg}
         />
-      </div>
 
-      <div className={styles.slideControls}>
-        <div className={styles.slideDots}>
-          {SLIDES.map((_, i) => (
-            <button
-              key={i}
-              className={`${styles.dot} ${i === idx ? styles.dotOn : ""}`}
-              onClick={() => setIdx(i)}
-              aria-label={`Slide ${i + 1}`}
-            />
-          ))}
-        </div>
-        <div className={styles.slideArrows}>
+        {/* Side arrows — overlaid on the image */}
+        <button className={`${styles.sideArrow} ${styles.sideArrowL}`} onClick={prev} aria-label="Previous">←</button>
+        <button className={`${styles.sideArrow} ${styles.sideArrowR}`} onClick={next} aria-label="Next">→</button>
+
+        {/* Dots + counter — overlaid at the bottom */}
+        <div className={styles.slideOverlay}>
+          <div className={styles.slideDots}>
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                className={`${styles.dot} ${i === idx ? styles.dotOn : ""}`}
+                onClick={() => setIdx(i)}
+                aria-label={`Slide ${i + 1}`}
+              />
+            ))}
+          </div>
           <span className={styles.slideNum}>{idx + 1} / {NUM_SLIDES}</span>
-          <button className={styles.arrow} onClick={prev} aria-label="Previous">←</button>
-          <button className={styles.arrow} onClick={next} aria-label="Next">→</button>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@ export default function ArtistPage() {
       {/* Video */}
       <section className={styles.videoSection}>
         <div className={styles.videoLabel}>
-          <div className="kicker">Film · the artist at work</div>
+          <div className="kicker">GUBA Exhibition</div>
         </div>
         <VideoPlayer src="/profile/video.mp4" label="Watch" />
       </section>
