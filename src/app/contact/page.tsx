@@ -22,18 +22,16 @@ export default function ContactPage() {
 
       <div className={styles.grid}>
         <div className={styles.side}>
-          <h4>Direct</h4>
-          <p><a href="mailto:studio@marenholloway.art">studio@marenholloway.art</a></p>
-          <p>+44 131 555 0184</p>
+          <h4>Phone</h4>
+          <p>
+            <a href="tel:+447946654717">+44 7946 654717</a><br />
+            <a href="tel:+447415690048">+44 7415 690048</a><br />
+            <a href="tel:+447984229211">+44 7984 229211</a><br />
+            <a href="tel:+233245500678">+233 245 500678</a>
+          </p>
 
           <h4>Studio</h4>
-          <p>14 Patriothall Lane,<br />Edinburgh EH3 5AY,<br />Scotland.</p>
-
-          <h4>Visit</h4>
-          <p>By appointment, Thursdays &amp; Fridays.</p>
-
-          <h4>Representation</h4>
-          <p>Ingleby Gallery — UK<br />Karsten Schubert — international</p>
+          <p>167–169 Great Portland Street,<br />London W1W 5PF,<br />United Kingdom.</p>
         </div>
 
         {!sent ? (
