@@ -98,23 +98,14 @@
 /* Hamburger — hidden on desktop */
 .burger {
   display: none;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
   width: 36px; height: 36px;
-  padding: 6px;
   border-radius: 4px;
+  color: var(--ink);
   transition: background 0.15s;
 }
-.burger:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); }
-.burger span {
-  display: block; height: 1.5px;
-  background: var(--ink); border-radius: 2px;
-  transition: transform 0.25s, opacity 0.2s;
-}
-.burgerOpen span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-.burgerOpen span:nth-child(2) { opacity: 0; }
-.burgerOpen span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+.burger:hover { background: rgba(0,0,0,0.06); }
 
 /* Mobile nav drawer */
 .mobileNav {

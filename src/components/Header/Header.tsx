@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { ARTIST } from "@/lib/data";
@@ -84,11 +85,11 @@ export default function Header({ query, setQuery }: Props) {
 
           {/* Hamburger */}
           <button
-            className={`${styles.burger} ${menuOpen ? styles.burgerOpen : ""}`}
+            className={styles.burger}
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Menu"
           >
-            <span /><span /><span />
+            {menuOpen ? <X size={22} strokeWidth={1.8} /> : <Menu size={22} strokeWidth={1.8} />}
           </button>
         </div>
       </div>
