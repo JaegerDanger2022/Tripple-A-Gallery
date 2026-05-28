@@ -67,7 +67,12 @@
       "Bash(node -e \"const l = require\\('C:/Users/mkmen/Documents/GitHub/BUSINESS_REPOS/Tripple-A-Gallery/package-lock.json'\\); const pkg = l.packages['node_modules/@emnapi/core']; console.log\\('emnapi/core optional:', pkg?.optional\\); const pkg2 = l.packages['node_modules/sharp/node_modules/@img/sharp-wasm32']; console.log\\('sharp-wasm32 optional:', pkg2?.optional\\)\")",
       "PowerShell(node -e \"require\\('firebase-admin'\\)\" 2>&1)",
       "PowerShell(if \\($?\\) { \"available\" } else { \"not available\" })",
-      "PowerShell(gcloud auth print-access-token 2>&1)"
+      "PowerShell(gcloud auth print-access-token 2>&1)",
+      "Bash(ls -la \"/c/Users/mkmen/Documents/GitHub/BUSINESS_REPOS/Tripple-A-Gallery/\" 2>/dev/null || ls -la \"/mnt/c/Users/mkmen/Documents/GitHub/BUSINESS_REPOS/Tripple-A-Gallery/\" 2>/dev/null || pwd)",
+      "Read(//mnt/c/Users/mkmen/Documents/GitHub/BUSINESS_REPOS/**)",
+      "Bash(cd \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\" && rm package-lock.json && npm install 2>&1 | tail -10)",
+      "Bash(npm ci *)",
+      "Bash(node scripts/watermark.mjs)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery\\atelier\\src\\app\\works",

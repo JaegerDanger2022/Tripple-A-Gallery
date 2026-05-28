@@ -43,6 +43,9 @@ firebase-debug.log*
 # video files — served from Firebase Storage, not git
 public/profile/*.mp4
 
+# service account keys
+*firebase-adminsdk*.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
