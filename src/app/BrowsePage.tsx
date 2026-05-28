@@ -109,7 +109,7 @@ export default function BrowsePage() {
             key={a.id}
             artwork={a}
             idx={i}
-            onOpen={() => router.push(`/works/${a.id}`)}
+            onOpen={() => router.push(`/works/${encodeURIComponent(a.id)}`)}
           />
         ))}
         {filtered.length === 0 && (

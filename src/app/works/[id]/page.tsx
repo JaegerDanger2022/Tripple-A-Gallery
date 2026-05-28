@@ -11,7 +11,8 @@ import type { Artwork } from "@/lib/types";
 import styles from "./detail.module.css";
 
 export default function DetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  const { id: rawId } = use(params);
+  const id = decodeURIComponent(rawId);
   const router = useRouter();
   const { artworks, dataLoading } = useApp();
   const a = artworks.find((x) => x.id === id);
@@ -207,7 +208,7 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
         </div>
         <div className={styles.relatedGrid}>
           {related.map((r, i) => (
-            <ArtworkCard key={r.id} artwork={r} idx={i} onOpen={() => router.push(`/works/${r.id}`)} />
+            <ArtworkCard key={r.id} artwork={r} idx={i} onOpen={() => router.push(`/works/${encodeURIComponent(r.id)}`)} />
           ))}
         </div>
       </section>
