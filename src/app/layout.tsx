@@ -39,6 +39,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Ama Antwiwaa Amponsah — Tripple A Gallery",
   description: "Original paintings, collages, and mixed-media works by British/Ghanaian artist Ama Antwiwaa Amponsah (Triple \"A\").",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#f5f0ea"/>
+  <text
+    x="16"
+    y="27"
+    text-anchor="middle"
+    font-family="'Instrument Serif', 'Cormorant Garamond', Georgia, serif"
+    font-style="italic"
+    font-weight="400"
+    font-size="28"
+    fill="#7a3b2e"
+  >A</text>
+</svg>
