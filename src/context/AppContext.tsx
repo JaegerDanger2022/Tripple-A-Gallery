@@ -70,7 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [frames, setFrames] = useState<FrameOption[]>([]);
   const [formats, setFormats] = useState<FormatOption[]>([]);
-  const [dataLoading, setDataLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     setDataLoading(true);

@@ -13,8 +13,12 @@ import styles from "./detail.module.css";
 export default function DetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { artworks } = useApp();
+  const { artworks, dataLoading } = useApp();
   const a = artworks.find((x) => x.id === id);
+
+  if (dataLoading && !a) {
+    return <div style={{ padding: "80px 40px", textAlign: "center", color: "var(--muted)" }}>Loading…</div>;
+  }
 
   if (!a) {
     return (
