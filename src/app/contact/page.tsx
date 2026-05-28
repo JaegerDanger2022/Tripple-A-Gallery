@@ -24,7 +24,7 @@ export default function ContactPage() {
         <div className={styles.side}>
           <h4>Phone</h4>
           <p>
-            <a href="tel:+447946654717">+44 7946 654717</a><br />
+            <a href="tel:+447946654716">+44 7946 654716</a><br />
             <a href="tel:+447415690048">+44 7415 690048</a><br />
             <a href="tel:+447984229211">+44 7984 229211</a><br />
             <a href="tel:+233245500678">+233 245 500678</a>
