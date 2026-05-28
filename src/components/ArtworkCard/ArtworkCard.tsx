@@ -4,19 +4,16 @@ import type { Artwork } from "@/lib/types";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import styles from "./ArtworkCard.module.css";
 
-const RATIOS = ["portrait", "portrait", "landscape", "portrait", "square", "portrait", "landscape", "portrait", "square", "portrait"] as const;
-
 interface Props {
   artwork: Artwork;
   idx: number;
   onOpen: () => void;
 }
 
-export default function ArtworkCard({ artwork: a, idx, onOpen }: Props) {
-  const ratio = RATIOS[idx % RATIOS.length];
+export default function ArtworkCard({ artwork: a, idx: _idx, onOpen }: Props) {
   return (
     <article className={styles.card} onClick={onOpen}>
-      <ArtPlaceholder artwork={a} ratio={ratio} />
+      <ArtPlaceholder artwork={a} />
       <div className={styles.meta}>
         <div className={styles.top}>
           <span className={styles.title}>Lot {a.lotNumber}</span>

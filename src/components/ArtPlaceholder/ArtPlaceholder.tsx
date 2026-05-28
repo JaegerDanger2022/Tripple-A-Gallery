@@ -6,18 +6,17 @@ import styles from "./ArtPlaceholder.module.css";
 
 interface Props {
   artwork: Artwork;
-  ratio?: "portrait" | "landscape" | "square";
+  ratio?: "portrait" | "landscape" | "square"; // kept for fallback placeholder only
   showLabel?: boolean;
   style?: React.CSSProperties;
 }
 
 export default function ArtPlaceholder({ artwork: a, ratio = "portrait", showLabel = true, style }: Props) {
-  const ar = ratio === "landscape" ? "4 / 3" : ratio === "square" ? "1 / 1" : "3 / 4";
   const [imgError, setImgError] = useState(false);
 
   if (a.imageUrl && !imgError) {
     return (
-      <div className={styles.ph} style={{ aspectRatio: ar, background: a.color, ...style }}>
+      <div className={styles.ph} style={{ background: a.color, ...style }}>
         <img
           src={a.imageUrl}
           alt={`Lot ${a.lotNumber}`}
@@ -31,7 +30,8 @@ export default function ArtPlaceholder({ artwork: a, ratio = "portrait", showLab
     );
   }
 
-  // Colour placeholder fallback
+  // Colour placeholder fallback — use ratio for sizing when no image
+  const ar = ratio === "landscape" ? "4 / 3" : ratio === "square" ? "1 / 1" : "3 / 4";
   const stripeId = `s-${a.id}-${ratio}`;
   return (
     <div className={styles.ph} style={{ aspectRatio: ar, background: a.color, ...style }}>
