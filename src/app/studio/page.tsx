@@ -87,7 +87,7 @@ export default function ArtistPage() {
         <div className={styles.videoLabel}>
           <div className="kicker">GUBA Exhibition</div>
         </div>
-        <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/video.mp4" label="Watch" />
+        <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/video.mp4" label="Watch" modal />
       </section>
 
       {/* Artist at Work videos */}
@@ -96,9 +96,9 @@ export default function ArtistPage() {
           <div className="kicker">Artist at Work</div>
         </div>
         <div className={styles.videoGridRow}>
-          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/artist%20at%20work.mp4" label="Watch" aspectRatio="9/16" />
-          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/artist%20at%20work%202.mp4" label="Watch" aspectRatio="9/16" />
-          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/artist%20at%20work%203.mp4" label="Watch" aspectRatio="9/16" />
+          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/artist%20at%20work.mp4" label="Watch" aspectRatio="9/16" modal />
+          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/artist%20at%20work%202.mp4" label="Watch" aspectRatio="9/16" modal />
+          <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/artist%20at%20work%203.mp4" label="Watch" aspectRatio="9/16" modal />
         </div>
       </section>
 
