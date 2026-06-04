@@ -1,4 +1,4 @@
-import type { Artist, Artwork } from "./types";
+import type { Artist, Artwork, Variant } from "./types";
 
 export const ARTIST: Artist = {
   name: "Ama Antwiwaa Amponsah",
@@ -41,8 +41,8 @@ export const ARTWORKS: Artwork[] = [...AAA_LOTS, ...TA_LOTS, ...TRIPPLE_LOTS].ma
 export const CATEGORIES = ["All", "Painting", "Drawing", "Print"] as const;
 export const SERIES = [...new Set(ARTWORKS.map((a) => a.series))];
 
-export function getVariants(a: Artwork) {
-  const out = [
+export function getVariants(a: Artwork): Variant[] {
+  const out: Variant[] = [
     {
       id: "print-sm",
       label: "Print, small",
@@ -62,6 +62,7 @@ export function getVariants(a: Artwork) {
       label: "Original",
       sub: "1 of 1 · signed verso",
       price: a.price || 0,
+      isOriginal: true,
     });
   } else if (a.edition.startsWith("Edition")) {
     out.push({

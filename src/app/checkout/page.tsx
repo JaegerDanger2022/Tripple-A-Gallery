@@ -49,7 +49,9 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);
-  const shipping = cart.length ? 24 : 0;
+  // Digital downloads aren't shipped — only charge shipping when a physical item is present.
+  const hasPhysical = cart.some((it) => !it.isDigital);
+  const shipping = hasPhysical ? 24 : 0;
   const total = subtotal + shipping;
 
   function set(k: string, v: string) {
@@ -77,12 +79,45 @@ export default function CheckoutPage() {
 
   function next() { if (validate(step)) setStep(step + 1); }
 
-  function placeOrder() {
+  const [placing, setPlacing] = useState(false);
+
+  async function placeOrder() {
     if (!validate(3)) return;
+    setPlacing(true);
     const sub = cart.reduce((s, it) => s + it.price * it.qty, 0);
+    const ship = shipping;
     const orderId = "AI-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+    // Persist the order so the buyer can see it in their account.
+    // Only stored when signed in (account history is per-user).
+    if (user) {
+      try {
+        const { createOrder } = await import("@/lib/firestore");
+        await createOrder({
+          id: orderId,
+          userId: user.uid,
+          email: form.email || user.email || "",
+          items: cart.map((it) => ({
+            artworkId: it.artworkId,
+            lotNumber: it.lotNumber ?? "",
+            variantLabel: it.variantLabel,
+            frameLabel: it.frameLabel,
+            price: it.price,
+            qty: it.qty,
+            ...(it.isDigital ? { isDigital: true } : {}),
+          })),
+          subtotal: sub,
+          shipping: ship,
+          total: sub + ship,
+          status: "paid",
+        });
+      } catch {
+        // Don't block the buyer if persistence fails — receipt still goes out.
+      }
+    }
+
     clearCart();
-    router.push(`/confirmation?orderId=${orderId}&total=${sub + 24}`);
+    router.push(`/confirmation?orderId=${orderId}&total=${sub + ship}`);
   }
 
   if (cart.length === 0) {
@@ -147,7 +182,9 @@ export default function CheckoutPage() {
               <p className="form-note">Payment processed securely. Card details aren't stored on our end.</p>
               <div className="form-actions">
                 <button className="ghost" onClick={() => setStep(2)}>← Back</button>
-                <button className="primary" onClick={placeOrder}>Place order · £{total.toLocaleString()}</button>
+                <button className="primary" onClick={placeOrder} disabled={placing}>
+                  {placing ? "Placing order…" : `Place order · £${total.toLocaleString()}`}
+                </button>
               </div>
             </div>
           )}

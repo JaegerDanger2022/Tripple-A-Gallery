@@ -1,6 +1,6 @@
 import styles from "./commissions.module.css";
 
-export const metadata = { title: "Commissions — Tripple A Gallery" };
+export const metadata = { title: "Commissions — Triple A Gallery" };
 
 export default function CommissionsPage() {
   return (

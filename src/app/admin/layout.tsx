@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import styles from "./admin.module.css";
@@ -12,9 +12,11 @@ type State = "loading" | "unauthenticated" | "checking" | "authorised" | "denied
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<State>("loading");
+  const [view, setView] = useState<"signin" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
+  const [resetSent, setResetSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const pathname = usePathname();
 
@@ -41,13 +43,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }
 
+  async function handleReset(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    setSubmitting(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setResetSent(true);
+    } catch {
+      // Don't reveal whether the address exists — show the same confirmation.
+      setResetSent(true);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function showSignIn() {
+    setView("signin");
+    setErr("");
+    setResetSent(false);
+    setPassword("");
+  }
+
+  function showForgot() {
+    setView("forgot");
+    setErr("");
+    setResetSent(false);
+  }
+
   if (state === "loading" || state === "checking") return null;
 
   if (state === "denied") {
     return (
       <div className={styles.gate}>
         <div className={styles.gateBox}>
-          <div className="kicker">Admin · Tripple A Gallery</div>
+          <div className="kicker">Admin · Triple A Gallery</div>
           <h1 className={styles.gateTitle}>Not authorised</h1>
           <p style={{ fontSize: 14, color: "var(--muted)", margin: 0 }}>
             Your account doesn't have admin access.
@@ -65,10 +95,61 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (state === "unauthenticated") {
+    const linkBtnStyle: React.CSSProperties = {
+      fontFamily: "var(--f-mono)", fontSize: 11, color: "var(--muted)",
+      letterSpacing: "0.06em", textAlign: "left", padding: 0,
+    };
+
+    if (view === "forgot") {
+      return (
+        <div className={styles.gate}>
+          <div className={styles.gateBox}>
+            <div className="kicker">Admin · Triple A Gallery</div>
+            <h1 className={styles.gateTitle}>Reset password</h1>
+            {resetSent ? (
+              <>
+                <p style={{ fontSize: 14, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
+                  If an admin account exists for <strong style={{ color: "var(--ink)" }}>{email}</strong>,
+                  a password-reset link is on its way. Check your inbox (and spam).
+                </p>
+                <button type="button" className="primary" onClick={showSignIn} style={{ marginTop: 8 }}>
+                  ← Back to sign in
+                </button>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 14, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
+                  Enter your admin email and we’ll send you a link to set a new password.
+                </p>
+                <form className={styles.gateForm} onSubmit={handleReset}>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    autoFocus
+                    required
+                    onChange={(e) => { setEmail(e.target.value); setErr(""); }}
+                    className={err ? styles.inputErr : ""}
+                  />
+                  {err && <p className={styles.errMsg}>{err}</p>}
+                  <button type="submit" className="primary" disabled={submitting}>
+                    {submitting ? "Sending…" : "Send reset link →"}
+                  </button>
+                  <button type="button" onClick={showSignIn} style={linkBtnStyle}>
+                    ← Back to sign in
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={styles.gate}>
         <div className={styles.gateBox}>
-          <div className="kicker">Admin · Tripple A Gallery</div>
+          <div className="kicker">Admin · Triple A Gallery</div>
           <h1 className={styles.gateTitle}>Studio access</h1>
           <form className={styles.gateForm} onSubmit={handleSignIn}>
             <input
@@ -92,6 +173,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <button type="submit" className="primary" disabled={submitting}>
               {submitting ? "Signing in…" : "Sign in →"}
             </button>
+            <button type="button" onClick={showForgot} style={linkBtnStyle}>
+              Forgot password?
+            </button>
           </form>
         </div>
       </div>
@@ -103,7 +187,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className={styles.sidebar}>
         <div className={styles.sidebarHeader}>
           <div className="kicker">Admin</div>
-          <span className={styles.sidebarTitle}>Tripple A Gallery</span>
+          <span className={styles.sidebarTitle}>Triple A Gallery</span>
         </div>
         <nav className={styles.sidebarNav}>
           <Link href="/admin/artworks" className={pathname.startsWith("/admin/artworks") ? styles.active : ""}>
@@ -117,6 +201,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <Link href="/admin/formats" className={pathname.startsWith("/admin/formats") ? styles.active : ""}>
             <span className={styles.navIcon}>◫</span> Formats
+          </Link>
+          <Link href="/admin/users" className={pathname.startsWith("/admin/users") ? styles.active : ""}>
+            <span className={styles.navIcon}>◉</span> Users
           </Link>
         </nav>
         <div className={styles.sidebarFooter}>

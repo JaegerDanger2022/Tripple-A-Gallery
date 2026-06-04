@@ -38,6 +38,40 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Users (tiered access) — a signed-in user owns their own profile doc.
+    //  • read: only your own profile (admins read all, e.g. the admin Users page).
+    //  • create: only your own doc, and ONLY at tier 0. This lets the client
+    //    self-provision on first sign-in without being able to grant paid tiers.
+    //  • update: a user may edit their own non-privileged fields, but NEVER
+    //    change `tier` — that's set by the server (Stripe fulfilment via the
+    //    Admin SDK, which bypasses rules) or by an admin (the admin Users page).
+    //  • delete: never from the client.
+    match /users/{uid} {
+      allow read: if isAdmin() ||
+        (request.auth != null && request.auth.uid == uid);
+      allow create: if request.auth != null &&
+        request.auth.uid == uid &&
+        request.resource.data.tier == 0;
+      allow update: if isAdmin() ||
+        (request.auth != null &&
+         request.auth.uid == uid &&
+         request.resource.data.tier == resource.data.tier);
+      allow delete: if false;
+    }
+
+    // Orders — a buyer may read their own orders and create an order for
+    // themselves at checkout. Orders are immutable from the client once placed
+    // (no update/delete), so download entitlements can't be tampered with.
+    // The download gate reads orders server-side via the Admin SDK (bypasses
+    // these rules); admins may read all orders.
+    match /orders/{orderId} {
+      allow read: if isAdmin() ||
+        (request.auth != null && resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     // Deny everything else
     match /{document=**} {
       allow read, write: if false;

@@ -35,7 +35,7 @@ export default function WelcomeModal() {
     <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && close()}>
       <div className={styles.modal}>
         <div className={styles.hd}>
-          <div className={styles.kicker}>Tripple A Gallery · Welcome</div>
+          <div className={styles.kicker}>Triple A Gallery · Welcome</div>
           <button className={styles.close} onClick={close} aria-label="Close">×</button>
         </div>
 

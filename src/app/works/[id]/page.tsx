@@ -2,22 +2,29 @@
 
 import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Lock } from "lucide-react";
 import { ARTIST, getVariants } from "@/lib/data";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
+import { isUnlocked } from "@/lib/tier";
 import type { Variant } from "@/lib/types";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import ArtworkCard from "@/components/ArtworkCard/ArtworkCard";
 import type { Artwork } from "@/lib/types";
 import styles from "./detail.module.css";
 
+// Price (£) for the digital download option — flat for any work.
+const DIGITAL_PRICE = 15;
+
 export default function DetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: rawId } = use(params);
   const id = decodeURIComponent(rawId);
   const router = useRouter();
   const { artworks, dataLoading } = useApp();
+  const { user, profile, profileLoading, openAuthModal } = useAuth();
   const a = artworks.find((x) => x.id === id);
 
-  if (dataLoading && !a) {
+  if ((dataLoading || profileLoading) && !a) {
     return <div style={{ padding: "80px 40px", textAlign: "center", color: "var(--muted)" }}>Loading…</div>;
   }
 
@@ -26,6 +33,38 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
       <div style={{ padding: "80px 40px", textAlign: "center" }}>
         <h1 style={{ fontFamily: "var(--f-display)" }}>Work not found</h1>
         <button onClick={() => router.push("/")} style={{ marginTop: 24 }}>← Back to works</button>
+      </div>
+    );
+  }
+
+  // Tier gate — block direct-URL access to works the user hasn't unlocked.
+  // Wait for the profile to settle so we don't flash the locked screen.
+  if (!profileLoading && !isUnlocked(profile, a.id, artworks.map((x) => x.id))) {
+    return (
+      <div className={styles.lockedGate}>
+        <span className={styles.lockedGateBadge}>
+          <Lock size={22} strokeWidth={1.7} />
+        </span>
+        <h1 className={styles.lockedGateTitle}>This work is locked</h1>
+        <p className={styles.lockedGateText}>
+          {user
+            ? "Your current tier doesn't include this piece. Upgrade your access to view it in full."
+            : "Sign in to see the works in your collection, or upgrade your tier for the full catalogue."}
+        </p>
+        <div className={styles.lockedGateActions}>
+          {user ? (
+            <button className={styles.lockedGateCta} onClick={() => router.push("/pricing")}>
+              Upgrade access
+            </button>
+          ) : (
+            <button className={styles.lockedGateCta} onClick={() => openAuthModal("signin")}>
+              Sign in
+            </button>
+          )}
+          <button className={styles.lockedGateBack} onClick={() => router.push("/")}>
+            ← Back to works
+          </button>
+        </div>
       </div>
     );
   }
@@ -45,19 +84,37 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const revealed = revealedArtworks.has(a.id);
 
   // Build variant list: from Firestore formats if available, else static fallback
-  const variants: Variant[] = formats.length > 0
+  const baseVariants: Variant[] = formats.length > 0
     ? formats
         .filter((f) => f.enabled)
-        .map((f) => ({
-          id: f.id,
-          label: f.name,
-          sub: f.description,
+        .map((f) => {
           // fixed with price 0 = use the artwork's own price (e.g. Original)
-          price: f.priceMode === "fixed"
-            ? (f.fixedPrice > 0 ? f.fixedPrice : a.price || 0)
-            : Math.round((a.price || 200) * f.percentBase + f.percentAdd),
-        }))
+          const isOriginal = f.priceMode === "fixed" && f.fixedPrice <= 0;
+          return {
+            id: f.id,
+            label: f.name,
+            sub: f.description,
+            price: f.priceMode === "fixed"
+              ? (f.fixedPrice > 0 ? f.fixedPrice : a.price || 0)
+              : Math.round((a.price || 200) * f.percentBase + f.percentAdd),
+            isOriginal,
+          };
+        })
     : getVariants(a);
+
+  // Digital download — only offered when the admin has uploaded a hi-res file.
+  // The file itself is private; buyers receive it via a gated signed URL.
+  const hasDigital = Boolean(a.hiResPath);
+  const digitalVariant: Variant = {
+    id: "digital",
+    label: "Digital download",
+    sub: "High-res image · instant download · personal use",
+    price: DIGITAL_PRICE,
+    isDigital: true,
+  };
+  const variants: Variant[] = hasDigital
+    ? [digitalVariant, ...baseVariants]
+    : baseVariants;
 
   const v = variants.find((x) => x.id === variantId) ?? variants[0];
 
@@ -65,7 +122,8 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const unframed = { id: "none", name: "Unframed", color: "#e8e4dc", price: 0, order: -1 };
   const frameOpts = frames.length > 0 ? frames : [unframed];
   const selectedFrame = frameOpts.find((f) => f.id === frameId) ?? frameOpts[0];
-  const total = v.price + (selectedFrame?.price ?? 0);
+  // Digital downloads have no physical frame; price is just the file.
+  const total = v.isDigital ? v.price : v.price + (selectedFrame?.price ?? 0);
 
   const related = artworks
     .filter((x) => x.id !== a.id && ((a.series && x.series === a.series) || x.category === a.category))
@@ -77,15 +135,18 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   }
 
   function onAdd() {
+    const digital = v?.isDigital;
     addToCart({
-      id: `${a.id}-${v?.id ?? ""}-${frameId}`,
+      id: `${a.id}-${v?.id ?? ""}-${digital ? "digital" : frameId}`,
       artworkId: a.id,
       variantId: v?.id ?? "",
       variantLabel: v?.label ?? "",
-      frameId,
-      frameLabel: selectedFrame?.name ?? "Unframed",
+      frameId: digital ? "none" : frameId,
+      frameLabel: digital ? "Digital file" : (selectedFrame?.name ?? "Unframed"),
       price: total,
       qty: 1,
+      isDigital: digital,
+      lotNumber: a.lotNumber,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -103,13 +164,6 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
       <div className={styles.grid}>
         <div className={styles.imgCol}>
           <ArtPlaceholder artwork={a} ratio="portrait" />
-          <div className={styles.thumbs}>
-            {[0, 1, 2].map((i) => (
-              <div key={i} className={`${styles.thumb} ${i === 0 ? styles.thumbOn : ""}`}>
-                <ArtPlaceholder artwork={a} ratio="square" showLabel={false} />
-              </div>
-            ))}
-          </div>
         </div>
 
         <aside className={styles.info}>
@@ -153,12 +207,21 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                       >
                         <span className={styles.vLabel}>{vv.label}</span>
                         <span className={styles.vSub}>{vv.sub}</span>
-                        <span className={styles.vPrice}>£{vv.price.toLocaleString()}</span>
+                        {vv.isOriginal ? (
+                          a.soldOut ? (
+                            <span className={styles.vSold}>Sold</span>
+                          ) : (
+                            <span className={styles.vContact}>Contact for price</span>
+                          )
+                        ) : (
+                          <span className={styles.vPrice}>£{vv.price.toLocaleString()}</span>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {!v?.isDigital && (
                 <div className={styles.buyRow}>
                   <label className={styles.buyLbl}>Framing</label>
                   <div className={styles.frameOpts}>
@@ -177,18 +240,46 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                     ))}
                   </div>
                 </div>
+                )}
 
                 <div className={styles.buyTotal}>
                   <div>
                     <span className={styles.buyTotalLbl}>Total</span>
-                    <span className={styles.buyTotalVal}>£{total.toLocaleString()}</span>
+                    {v?.isOriginal ? (
+                      <span className={styles.buyTotalVal}>{a.soldOut ? "Sold" : "Contact for price"}</span>
+                    ) : (
+                      <span className={styles.buyTotalVal}>£{total.toLocaleString()}</span>
+                    )}
                   </div>
-                  <span className={styles.buyTotalNote}>incl. archival packing · shipping calc&apos;d at checkout</span>
+                  <span className={styles.buyTotalNote}>
+                    {v?.isOriginal
+                      ? (a.soldOut
+                          ? "This original is sold · prints & editions still available"
+                          : "Originals are sold by enquiry · prints & editions available below")
+                      : v?.isDigital
+                        ? "High-res digital file · emailed after checkout · personal use only"
+                        : "incl. archival packing · shipping calc'd at checkout"}
+                  </span>
                 </div>
 
-                <button className={`${styles.buyCta} ${added ? styles.buyCtaAdded : ""}`} onClick={onAdd}>
-                  {added ? "Added to cart ✓" : "Add to cart"}
-                </button>
+                {v?.isOriginal ? (
+                  a.soldOut ? (
+                    <p className={styles.buySoldNote}>
+                      The original is sold — choose a print or edition above to add to cart.
+                    </p>
+                  ) : (
+                    <button
+                      className={styles.buyCta}
+                      onClick={() => router.push(`/contact?lot=${encodeURIComponent(a.lotNumber)}`)}
+                    >
+                      Contact us about this original
+                    </button>
+                  )
+                ) : (
+                  <button className={`${styles.buyCta} ${added ? styles.buyCtaAdded : ""}`} onClick={onAdd}>
+                    {added ? "Added to cart ✓" : "Add to cart"}
+                  </button>
+                )}
               </div>
             )}
           </div>

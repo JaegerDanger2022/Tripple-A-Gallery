@@ -1,6 +1,6 @@
 import styles from "./press.module.css";
 
-export const metadata = { title: "Press — Tripple A Gallery" };
+export const metadata = { title: "Press — Triple A Gallery" };
 
 export default function PressPage() {
   return (

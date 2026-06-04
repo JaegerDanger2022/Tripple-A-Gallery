@@ -1,11 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./contact.module.css";
 
 export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactInner />
+    </Suspense>
+  );
+}
+
+function ContactInner() {
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const lot = searchParams.get("lot");
+
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", note: "", interest: "general" });
+
+  // Prefill name/email from the signed-in account, without clobbering edits.
+  useEffect(() => {
+    if (!user) return;
+    setForm((f) => ({
+      ...f,
+      name: f.name || user.displayName || "",
+      email: f.email || user.email || "",
+    }));
+  }, [user]);
+
+  // Arriving from a work's "Contact us about this original" — prefill intent + note.
+  useEffect(() => {
+    if (!lot) return;
+    setForm((f) => ({
+      ...f,
+      interest: "purchase",
+      note: f.note || `I'd like to purchase the original of Lot ${lot}. Please let me know about availability, price, and next steps.`,
+    }));
+  }, [lot]);
 
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -50,6 +84,7 @@ export default function ContactPage() {
               <span className="field-lbl">In regard to</span>
               <select value={form.interest} onChange={(e) => set("interest", e.target.value)}>
                 <option value="general">General enquiry</option>
+                <option value="purchase">Purchasing an original</option>
                 <option value="work">A specific work</option>
                 <option value="commission">A commission</option>
                 <option value="press">Press / publication</option>

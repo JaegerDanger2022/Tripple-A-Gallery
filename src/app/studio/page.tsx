@@ -21,19 +21,32 @@ function ProfileSlideshow() {
 
   return (
     <div className={styles.slideshow}>
-      <div className={styles.slideImgWrap} key={idx}>
-        <img
-          src={`${SLIDES[idx].src}?v=2`}
-          alt={SLIDES[idx].alt}
-          className={styles.slideImg}
-        />
+      <div className={styles.slideStage}>
+        <button className={`${styles.slideArrow} ${styles.slideArrowLeft}`} onClick={prev} aria-label="Previous">
+          <ChevronLeft size={20} strokeWidth={1.6} />
+        </button>
+
+        {/* All slides stay mounted and stacked; only the active one is visible.
+            This avoids a remount/decode flash that briefly revealed the section below. */}
+        <div className={styles.slideImgWrap}>
+          {SLIDES.map((slide, i) => (
+            <img
+              key={i}
+              src={`${slide.src}?v=2`}
+              alt={slide.alt}
+              className={`${styles.slideImg} ${i === idx ? styles.slideImgOn : ""}`}
+              aria-hidden={i === idx ? undefined : true}
+            />
+          ))}
+        </div>
+
+        <button className={`${styles.slideArrow} ${styles.slideArrowRight}`} onClick={next} aria-label="Next">
+          <ChevronRight size={20} strokeWidth={1.6} />
+        </button>
       </div>
 
-      {/* Controls bar below image */}
+      {/* Dots + counter below image */}
       <div className={styles.slideControls}>
-        <button className={styles.slideArrow} onClick={prev} aria-label="Previous">
-          <ChevronLeft size={18} strokeWidth={1.6} />
-        </button>
         <div className={styles.slideDots}>
           {SLIDES.map((_, i) => (
             <button
@@ -45,9 +58,6 @@ function ProfileSlideshow() {
           ))}
         </div>
         <span className={styles.slideNum}>{idx + 1} / {NUM_SLIDES}</span>
-        <button className={styles.slideArrow} onClick={next} aria-label="Next">
-          <ChevronRight size={18} strokeWidth={1.6} />
-        </button>
       </div>
     </div>
   );

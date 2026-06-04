@@ -3,10 +3,25 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Artwork images — public read, no client uploads
+    function isAdmin() {
+      return request.auth != null &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    // Public, front-facing artwork images (watermarked display copies).
+    // Anyone can read; no client uploads.
     match /artworks/{filename} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // Hi-res originals for digital purchases — PRIVATE.
+    // Admins may upload/replace; nobody can read directly.
+    // Buyers receive these only through the server-issued, short-lived signed
+    // URL from /api/download, which verifies the purchase first.
+    match /hires/{artworkId}/{filename} {
+      allow read: if false;
+      allow write: if isAdmin();
     }
 
     // Deny everything else

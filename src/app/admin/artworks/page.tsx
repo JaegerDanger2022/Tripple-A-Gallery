@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { Artwork, Category } from "@/lib/types";
-import { getArtworks, createArtwork, updateArtwork, deleteArtwork, getCategories, seedFirestore } from "@/lib/firestore";
+import { getArtworks, createArtwork, updateArtwork, deleteArtwork, getCategories, seedFirestore, uploadHiResImage } from "@/lib/firestore";
 import styles from "../admin.module.css";
 
 // ── Blank artwork for "add" mode ─────────────────────────────────────────────
@@ -14,12 +14,14 @@ const BLANK: Omit<Artwork, "id"> = {
   dimensions: "",
   edition: "Original work, 1 of 1",
   price: 0,
+  soldOut: false,
   category: "",
   color: "#ccbbaa",
   accent: "#555544",
   series: "",
   blurb: "",
   imageUrl: "",
+  hiResPath: "",
   order: 0,
 };
 
@@ -43,9 +45,26 @@ interface DrawerProps {
 
 function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerProps) {
   const [form, setForm] = useState(initial);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState("");
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  async function handleHiResUpload(file: File) {
+    setUploadErr("");
+    setUploading(true);
+    try {
+      // Namespace by the artwork id when editing, else by lot number for new works.
+      const key = (form as typeof form & { id?: string }).id || form.lotNumber || "new";
+      const path = await uploadHiResImage(key, file);
+      set("hiResPath", path);
+    } catch {
+      setUploadErr("Upload failed. Check your connection and try again.");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -106,6 +125,23 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
             </div>
           </div>
 
+          {/* Sold-out toggle for the original */}
+          <div className={styles.fld}>
+            <label className={styles.fldLbl}>Original (1 of 1)</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14 }}>
+              <input
+                type="checkbox"
+                checked={form.soldOut ?? false}
+                onChange={(e) => set("soldOut", e.target.checked)}
+                style={{ width: 16, height: 16, cursor: "pointer" }}
+              />
+              <span>Mark original as <strong>Sold</strong></span>
+            </label>
+            <p style={{ fontSize: 12, color: "var(--muted)", margin: "4px 0 0" }}>
+              When off, the original shows “Contact for price”. Prints &amp; editions are always sold online.
+            </p>
+          </div>
+
           {/* Medium & Dimensions */}
           <div className={styles.fld}>
             <label className={styles.fldLbl}>Medium</label>
@@ -132,6 +168,46 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
           <div className={styles.fld}>
             <label className={styles.fldLbl}>Image URL</label>
             <input className={styles.fldInput} type="url" value={form.imageUrl ?? ""} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://…" />
+          </div>
+
+          {/* Hi-def image for digital downloads */}
+          <div className={styles.fld}>
+            <label className={styles.fldLbl}>
+              Hi-def image <span style={{ fontWeight: 400, opacity: 0.5 }}>(for digital downloads)</span>
+            </label>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <label
+                className="ghost"
+                style={{ cursor: uploading ? "default" : "pointer", display: "inline-flex", alignItems: "center", padding: "8px 14px", border: "1px solid var(--line)", borderRadius: 4, fontSize: 13 }}
+              >
+                {uploading ? "Uploading…" : (form.hiResPath ? "Replace file" : "Upload file")}
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploading}
+                  style={{ display: "none" }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleHiResUpload(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              {form.hiResPath && !uploading && (
+                <>
+                  <span style={{ fontSize: 12, color: "var(--ink)", fontFamily: "var(--f-mono)" }}>
+                    ✓ uploaded
+                  </span>
+                  <button type="button" onClick={() => set("hiResPath", "")} style={{ fontSize: 12, color: "var(--muted)" }}>
+                    Remove
+                  </button>
+                </>
+              )}
+            </div>
+            {uploadErr && <p style={{ fontSize: 12, color: "var(--accent)", margin: "6px 0 0" }}>{uploadErr}</p>}
+            <p style={{ fontSize: 12, color: "var(--muted)", margin: "6px 0 0" }}>
+              Full-resolution file buyers receive when they purchase the digital download. Stored privately in Firebase Storage — released only to verified buyers via a secure link.
+            </p>
           </div>
 
           {/* Colour swatches */}
@@ -281,7 +357,14 @@ export default function ArtworksAdmin() {
                   </td>
                   <td><span className={styles.badge}>{a.category}</span></td>
                   <td style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>{a.year}</td>
-                  <td style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>£{a.price.toLocaleString()}</td>
+                  <td style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>
+                    £{a.price.toLocaleString()}
+                    {a.soldOut && (
+                      <span style={{ marginLeft: 8, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#c0392b", background: "#fff", border: "1px solid #c0392b", borderRadius: 999, padding: "2px 7px" }}>
+                        Sold
+                      </span>
+                    )}
+                  </td>
                   <td style={{ fontSize: 12, color: "var(--muted)" }}>{a.edition}</td>
                   <td>
                     <div className={styles.actions}>

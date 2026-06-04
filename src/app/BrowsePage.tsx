@@ -1,22 +1,118 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
+import { useAuth } from "@/context/AuthContext";
 import { ARTIST } from "@/lib/data";
+import { unlockedIds } from "@/lib/tier";
 import ArtworkCard from "@/components/ArtworkCard/ArtworkCard";
-import type { Sort } from "@/lib/types";
+import type { Sort, Density, Artwork } from "@/lib/types";
 import styles from "./browse.module.css";
+
+// Aspect-ratio class derived from an image's natural dimensions.
+type AspectClass = "square" | "portrait" | "landscape";
+
+// How many cards fit on one row, per density setting.
+const PER_ROW: Record<Density, number> = { compact: 4, regular: 3, spacious: 2 };
+
+function classifyRatio(w: number, h: number): AspectClass {
+  if (!w || !h) return "portrait";
+  const r = w / h;
+  if (r > 1.15) return "landscape";
+  if (r < 0.87) return "portrait";
+  return "square";
+}
+
+// Order aspect classes appear in: squares, then portraits, then landscapes.
+const CLASS_ORDER: Record<AspectClass, number> = { square: 0, portrait: 1, landscape: 2 };
+
+// CSS aspect-ratio each class renders its cards at, so every card in a row is
+// the exact same size (images fill the cell with object-fit: cover).
+const CLASS_AR: Record<AspectClass, string> = {
+  square: "1 / 1",
+  portrait: "3 / 4",
+  landscape: "4 / 3",
+};
+
+interface Row {
+  cls: AspectClass;
+  items: Artwork[];
+}
+
+// Group artworks into rows where every row holds only one aspect-ratio class.
+// The list is first reordered so all works of the same class sit together
+// (stable within each class, so the incoming sort order is preserved), then
+// packed into rows capped at `perRow`. This pulls same-ratio works onto shared
+// rows even when they are far apart in the original order.
+function groupRows(
+  list: Artwork[],
+  ratios: Record<string, AspectClass>,
+  perRow: number
+): Row[] {
+  const classOf = (a: Artwork): AspectClass => ratios[a.id] ?? "portrait";
+
+  // Stable sort by aspect class — keeps curated/sort order inside each group.
+  const ordered = list
+    .map((a, i) => ({ a, i }))
+    .sort((x, y) => {
+      const d = CLASS_ORDER[classOf(x.a)] - CLASS_ORDER[classOf(y.a)];
+      return d !== 0 ? d : x.i - y.i;
+    })
+    .map((e) => e.a);
+
+  const rows: Row[] = [];
+  let current: Artwork[] = [];
+  let currentClass: AspectClass | null = null;
+
+  for (const a of ordered) {
+    const cls = classOf(a);
+    const full = current.length >= perRow;
+    if (current.length === 0) {
+      current.push(a);
+      currentClass = cls;
+    } else if (cls === currentClass && !full) {
+      current.push(a);
+    } else {
+      rows.push({ cls: currentClass!, items: current });
+      current = [a];
+      currentClass = cls;
+    }
+  }
+  if (current.length) rows.push({ cls: currentClass!, items: current });
+  return rows;
+}
 
 export default function BrowsePage() {
   const { tweaks, artworks, categories } = useApp();
+  const { user, profile, openAuthModal } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Which works the current user can view. Signed-out / no profile → none.
+  const allIds = useMemo(() => artworks.map((a) => a.id), [artworks]);
+  const unlocked = useMemo(() => unlockedIds(profile, allIds), [profile, allIds]);
+  const unlockedCount = profile?.tier === 2 ? artworks.length : unlocked.size;
+
+  // Locked-card click: prompt sign-in if signed out, otherwise nudge to upgrade.
+  const handleLocked = useCallback(() => {
+    if (!user) openAuthModal("signin");
+    else router.push("/pricing");
+  }, [user, openAuthModal, router]);
+  const lockLabel = user ? "Upgrade to view" : "Sign in to view";
 
   const filterParam = searchParams.get("filter") ?? "All";
   const [filter, setFilter] = useState(filterParam);
   const [sort, setSort] = useState<Sort>("curated");
   const [query, setQuery] = useState("");
+
+  // Aspect-ratio class per artwork id, measured from each image's natural
+  // dimensions as it loads. Drives row grouping below.
+  const [ratios, setRatios] = useState<Record<string, AspectClass>>({});
+  const reportRatio = useCallback((id: string, w: number, h: number) => {
+    const cls = classifyRatio(w, h);
+    setRatios((prev) => (prev[id] === cls ? prev : { ...prev, [id]: cls }));
+  }, []);
 
   // Sync filter when URL changes
   useEffect(() => {
@@ -50,6 +146,13 @@ export default function BrowsePage() {
     return list;
   }, [artworks, filter, query, sort]);
 
+  // Build rows: consecutive artworks of the same aspect class, capped at the
+  // density's per-row count. Mixed classes never share a row.
+  const rows = useMemo(
+    () => groupRows(filtered, ratios, PER_ROW[tweaks.density]),
+    [filtered, ratios, tweaks.density]
+  );
+
   function handleFilter(c: string) {
     setFilter(c);
     router.replace(c === "All" ? "/" : `/?filter=${encodeURIComponent(c)}`);
@@ -60,7 +163,7 @@ export default function BrowsePage() {
       {/* Hero */}
       <section className={styles.hero}>
         <div className={styles.heroMeta}>
-          <div className="kicker">Tripple A Gallery</div>
+          <div className="kicker">Triple A Gallery</div>
           <div className={styles.heroDates}>Ama Antwiwaa Amponsah</div>
         </div>
         <h1 className={styles.heroTitle}>
@@ -73,6 +176,12 @@ export default function BrowsePage() {
           <span>{series.length} series</span>
           <span className={styles.dot} />
           <span>{ARTIST.based}</span>
+          {unlockedCount < artworks.length && (
+            <>
+              <span className={styles.dot} />
+              <span>{unlockedCount} of {artworks.length} unlocked</span>
+            </>
+          )}
         </div>
       </section>
 
@@ -102,15 +211,28 @@ export default function BrowsePage() {
         </div>
       </section>
 
-      {/* Grid */}
-      <section className={`${styles.grid} ${styles[`grid-${tweaks.density}` as keyof typeof styles]}`}>
-        {filtered.map((a, i) => (
-          <ArtworkCard
-            key={a.id}
-            artwork={a}
-            idx={i}
-            onOpen={() => router.push(`/works/${encodeURIComponent(a.id)}`)}
-          />
+      {/* Grid — rows grouped by aspect ratio (square / portrait / landscape) */}
+      <section className={styles.rows}>
+        {rows.map((row, ri) => (
+          <div
+            key={ri}
+            className={styles.row}
+            style={{ "--per-row": PER_ROW[tweaks.density] } as React.CSSProperties}
+          >
+            {row.items.map((a, i) => (
+              <ArtworkCard
+                key={a.id}
+                artwork={a}
+                idx={i}
+                cellRatio={CLASS_AR[row.cls]}
+                locked={!unlocked.has(a.id)}
+                lockLabel={lockLabel}
+                onLockedClick={handleLocked}
+                onRatio={(w, h) => reportRatio(a.id, w, h)}
+                onOpen={() => router.push(`/works/${encodeURIComponent(a.id)}`)}
+              />
+            ))}
+          </div>
         ))}
         {filtered.length === 0 && (
           <div className={styles.empty}>

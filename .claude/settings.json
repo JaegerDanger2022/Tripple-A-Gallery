@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "PowerShell(npx tsc --noEmit -p tsconfig.json)",
+      "PowerShell(npx eslint src/app/BrowsePage.tsx src/components/ArtworkCard/ArtworkCard.tsx src/components/ArtPlaceholder/ArtPlaceholder.tsx)",
+      "PowerShell(npx next build 2>&1)",
+      "Bash(npx eslint *)",
+      "Bash(node -e \"console.log\\('stripe', require\\('stripe/package.json'\\).version\\); console.log\\('@stripe/stripe-js', require\\('@stripe/stripe-js/package.json'\\).version\\)\")",
+      "Bash(echo \"EXIT: $?\")"
+    ]
+  }
+}

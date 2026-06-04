@@ -1,6 +1,6 @@
 import styles from "./shipping.module.css";
 
-export const metadata = { title: "Shipping & Returns — Tripple A Gallery" };
+export const metadata = { title: "Shipping & Returns — Triple A Gallery" };
 
 export default function ShippingPage() {
   return (

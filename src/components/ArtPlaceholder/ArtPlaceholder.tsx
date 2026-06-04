@@ -9,18 +9,31 @@ interface Props {
   ratio?: "portrait" | "landscape" | "square"; // kept for fallback placeholder only
   showLabel?: boolean;
   style?: React.CSSProperties;
+  /** Reports the image's natural dimensions once it loads. */
+  onRatio?: (w: number, h: number) => void;
+  /** When set, the cell is fixed to this aspect-ratio and the image covers it. */
+  cellRatio?: string;
 }
 
-export default function ArtPlaceholder({ artwork: a, ratio = "portrait", showLabel = true, style }: Props) {
+export default function ArtPlaceholder({ artwork: a, ratio = "portrait", showLabel = true, style, onRatio, cellRatio }: Props) {
   const [imgError, setImgError] = useState(false);
 
   if (a.imageUrl && !imgError) {
     return (
-      <div className={styles.ph} style={{ background: a.color, ...style }}>
+      <div
+        className={styles.ph}
+        style={{ background: a.color, ...(cellRatio ? { aspectRatio: cellRatio } : null), ...style }}
+      >
         <img
           src={a.imageUrl}
           alt={`Lot ${a.lotNumber}`}
-          className={styles.img}
+          className={cellRatio ? styles.imgCover : styles.img}
+          onLoad={(e) => {
+            const img = e.currentTarget;
+            if (onRatio && img.naturalWidth && img.naturalHeight) {
+              onRatio(img.naturalWidth, img.naturalHeight);
+            }
+          }}
           onError={() => setImgError(true)}
         />
         {showLabel && (

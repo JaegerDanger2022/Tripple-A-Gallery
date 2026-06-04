@@ -37,7 +37,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ama Antwiwaa Amponsah — Tripple A Gallery",
+  title: "Ama Antwiwaa Amponsah — Triple A Gallery",
   description: "Original paintings, collages, and mixed-media works by British/Ghanaian artist Ama Antwiwaa Amponsah (Triple \"A\").",
   icons: {
     icon: "/favicon.svg",

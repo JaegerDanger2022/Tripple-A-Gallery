@@ -1,6 +1,6 @@
 import styles from "./framing.module.css";
 
-export const metadata = { title: "Framing — Tripple A Gallery" };
+export const metadata = { title: "Framing — Triple A Gallery" };
 
 export default function FramingPage() {
   return (
