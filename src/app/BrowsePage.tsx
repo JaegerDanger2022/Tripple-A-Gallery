@@ -45,17 +45,27 @@ interface Row {
 // (stable within each class, so the incoming sort order is preserved), then
 // packed into rows capped at `perRow`. This pulls same-ratio works onto shared
 // rows even when they are far apart in the original order.
+//
+// `unlocked` (when provided) is the primary sort key: accessible works fill the
+// top rows and locked works follow below, so tier 0/1 users see what they can
+// view first. Aspect class is the secondary key, original order the tertiary.
 function groupRows(
   list: Artwork[],
   ratios: Record<string, AspectClass>,
-  perRow: number
+  perRow: number,
+  unlocked?: Set<string>
 ): Row[] {
   const classOf = (a: Artwork): AspectClass => ratios[a.id] ?? "portrait";
+  // 0 = unlocked (sorts first), 1 = locked. When no set is given (e.g. tier 2 /
+  // everything unlocked) every work scores 0, leaving the order unchanged.
+  const lockRank = (a: Artwork): number => (unlocked && !unlocked.has(a.id) ? 1 : 0);
 
-  // Stable sort by aspect class — keeps curated/sort order inside each group.
+  // Stable sort: unlocked-first, then aspect class, then incoming order.
   const ordered = list
     .map((a, i) => ({ a, i }))
     .sort((x, y) => {
+      const l = lockRank(x.a) - lockRank(y.a);
+      if (l !== 0) return l;
       const d = CLASS_ORDER[classOf(x.a)] - CLASS_ORDER[classOf(y.a)];
       return d !== 0 ? d : x.i - y.i;
     })
@@ -64,19 +74,25 @@ function groupRows(
   const rows: Row[] = [];
   let current: Artwork[] = [];
   let currentClass: AspectClass | null = null;
+  let currentLock: number | null = null;
 
   for (const a of ordered) {
     const cls = classOf(a);
+    const lock = lockRank(a);
     const full = current.length >= perRow;
+    // A row also breaks at the unlocked→locked boundary so a single row never
+    // mixes accessible and blurred works.
     if (current.length === 0) {
       current.push(a);
       currentClass = cls;
-    } else if (cls === currentClass && !full) {
+      currentLock = lock;
+    } else if (cls === currentClass && lock === currentLock && !full) {
       current.push(a);
     } else {
       rows.push({ cls: currentClass!, items: current });
       current = [a];
       currentClass = cls;
+      currentLock = lock;
     }
   }
   if (current.length) rows.push({ cls: currentClass!, items: current });
@@ -147,10 +163,12 @@ export default function BrowsePage() {
   }, [artworks, filter, query, sort]);
 
   // Build rows: consecutive artworks of the same aspect class, capped at the
-  // density's per-row count. Mixed classes never share a row.
+  // density's per-row count. Mixed classes never share a row. For tier 0/1,
+  // unlocked works are floated to the top rows (no effect for tier 2 / signed-out,
+  // where every work shares the same lock state).
   const rows = useMemo(
-    () => groupRows(filtered, ratios, PER_ROW[tweaks.density]),
-    [filtered, ratios, tweaks.density]
+    () => groupRows(filtered, ratios, PER_ROW[tweaks.density], unlocked),
+    [filtered, ratios, tweaks.density, unlocked]
   );
 
   function handleFilter(c: string) {

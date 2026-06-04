@@ -7,7 +7,12 @@
       "PowerShell(npx next build 2>&1)",
       "Bash(npx eslint *)",
       "Bash(node -e \"console.log\\('stripe', require\\('stripe/package.json'\\).version\\); console.log\\('@stripe/stripe-js', require\\('@stripe/stripe-js/package.json'\\).version\\)\")",
-      "Bash(echo \"EXIT: $?\")"
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npx firebase *)",
+      "Bash(git check-ignore *)",
+      "Bash(node scripts/backfill-user-profiles.mjs --dry-run)",
+      "Bash(node scripts/backfill-user-profiles.mjs)",
+      "Bash(echo \"TSC EXIT: $?\")"
     ]
   }
 }
