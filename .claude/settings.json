@@ -12,7 +12,12 @@
       "Bash(git check-ignore *)",
       "Bash(node scripts/backfill-user-profiles.mjs --dry-run)",
       "Bash(node scripts/backfill-user-profiles.mjs)",
-      "Bash(echo \"TSC EXIT: $?\")"
+      "Bash(echo \"TSC EXIT: $?\")",
+      "Bash(grep -vE \"set-state-in-effect|setState synchronously|Effects are intended|Update external|Subscribe for|Calling setState|^\\\\s*\\\\*|react.dev|^\\\\s*$|^\\\\s*[0-9]+ \\\\|\")",
+      "Bash(git mv *)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, StartTime, @{N='Cmd';E={\\(Get-CimInstance Win32_Process -Filter \"ProcessId=$\\($_.Id\\)\"\\).CommandLine}} | Format-List)",
+      "PowerShell(Stop-Process -Id 16628,14940,12180 -Force -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 800; $still = Get-Process node -ErrorAction SilentlyContinue; if \\($still\\) { \"Remaining node PIDs: $\\($still.Id -join ', '\\)\" } else { \"All node processes stopped.\" })",
+      "PowerShell(\"cleaned\")"
     ]
   }
 }

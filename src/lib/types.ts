@@ -92,6 +92,8 @@ export interface UserProfile {
   updatedAt: number;      // epoch ms
   stripeCustomerId?: string;     // set server-side once the user starts a subscription
   stripeSubscriptionId?: string; // current active subscription, for webhook mapping
+  adminTierLock?: boolean;       // when true, Stripe fulfilment NEVER changes tier —
+                                 // the admin-set tier always wins until unlocked.
 }
 
 export interface FormatOption {

@@ -14,6 +14,16 @@ export async function adminSetTier(uid: string, tier: Tier): Promise<void> {
   );
 }
 
+/**
+ * True when an admin has locked this user's tier. While locked, Stripe
+ * fulfilment must NOT change the tier — the manually-set tier always wins.
+ * Missing doc / missing flag → not locked.
+ */
+export async function adminIsTierLocked(uid: string): Promise<boolean> {
+  const snap = await usersDoc(uid).get();
+  return snap.exists ? snap.data()?.adminTierLock === true : false;
+}
+
 /** Persist the Stripe customer/subscription ids so the webhook can map events back to a uid. */
 export async function adminLinkStripe(
   uid: string,

@@ -81,4 +81,4 @@ for (const f of formats) {
   console.log(`  ✓ ${f.name}`);
 }
 
-console.log("\nDone — formats seeded. Visit /admin/formats to manage them.");
+console.log("\nDone — formats seeded. Visit /aaa-ops-92x4k1/formats to manage them.");

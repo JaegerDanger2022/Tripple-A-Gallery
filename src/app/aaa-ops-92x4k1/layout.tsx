@@ -190,19 +190,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className={styles.sidebarTitle}>Triple A Gallery</span>
         </div>
         <nav className={styles.sidebarNav}>
-          <Link href="/admin/artworks" className={pathname.startsWith("/admin/artworks") ? styles.active : ""}>
+          <Link href="/aaa-ops-92x4k1/artworks" className={pathname.startsWith("/aaa-ops-92x4k1/artworks") ? styles.active : ""}>
             <span className={styles.navIcon}>◻</span> Artworks
           </Link>
-          <Link href="/admin/categories" className={pathname.startsWith("/admin/categories") ? styles.active : ""}>
+          <Link href="/aaa-ops-92x4k1/categories" className={pathname.startsWith("/aaa-ops-92x4k1/categories") ? styles.active : ""}>
             <span className={styles.navIcon}>◈</span> Categories
           </Link>
-          <Link href="/admin/frames" className={pathname.startsWith("/admin/frames") ? styles.active : ""}>
+          <Link href="/aaa-ops-92x4k1/frames" className={pathname.startsWith("/aaa-ops-92x4k1/frames") ? styles.active : ""}>
             <span className={styles.navIcon}>⬚</span> Frames
           </Link>
-          <Link href="/admin/formats" className={pathname.startsWith("/admin/formats") ? styles.active : ""}>
+          <Link href="/aaa-ops-92x4k1/formats" className={pathname.startsWith("/aaa-ops-92x4k1/formats") ? styles.active : ""}>
             <span className={styles.navIcon}>◫</span> Formats
           </Link>
-          <Link href="/admin/users" className={pathname.startsWith("/admin/users") ? styles.active : ""}>
+          <Link href="/aaa-ops-92x4k1/users" className={pathname.startsWith("/aaa-ops-92x4k1/users") ? styles.active : ""}>
             <span className={styles.navIcon}>◉</span> Users
           </Link>
         </nav>

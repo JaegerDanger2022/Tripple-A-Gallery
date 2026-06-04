@@ -217,6 +217,9 @@ export async function ensureUserProfile(uid: string, email: string): Promise<Use
     tier1Works,
     createdAt: now,
     updatedAt: now,
+    // New accounts are Stripe-managed by default — an admin must lock the tier
+    // in the admin panel for the manual override to take precedence.
+    adminTierLock: false,
   };
   // Store everything except uid (it's the doc id).
   const { uid: _omit, ...data } = profile;
@@ -224,9 +227,18 @@ export async function ensureUserProfile(uid: string, email: string): Promise<Use
   return profile;
 }
 
-/** Admin: set a user's tier (0/1/2) until subscriptions drive this automatically. */
-export async function setUserTier(uid: string, tier: Tier): Promise<void> {
-  await updateDoc(doc(db, "users", uid), { tier, updatedAt: Date.now() });
+/**
+ * Admin: set a user's tier (0/1/2). Setting a tier manually engages the admin
+ * lock by default, so Stripe fulfilment won't later override the override.
+ * Pass `lock: false` to set the tier without locking (Stripe may then change it).
+ */
+export async function setUserTier(uid: string, tier: Tier, lock = true): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { tier, adminTierLock: lock, updatedAt: Date.now() });
+}
+
+/** Admin: toggle the tier lock without changing the tier itself. */
+export async function setUserTierLock(uid: string, locked: boolean): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { adminTierLock: locked, updatedAt: Date.now() });
 }
 
 /** Admin: list all user profiles, newest first. */

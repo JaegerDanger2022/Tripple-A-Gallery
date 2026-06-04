@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Tier, UserProfile } from "@/lib/types";
 import { TIER_LABELS } from "@/lib/tier";
-import { listUsers, setUserTier } from "@/lib/firestore";
+import { listUsers, setUserTier, setUserTierLock } from "@/lib/firestore";
 import styles from "../admin.module.css";
 
 function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
@@ -28,13 +28,27 @@ export default function UsersAdmin() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Setting a tier manually engages the admin lock so Stripe won't override it.
   async function changeTier(u: UserProfile, tier: Tier) {
     if (tier === u.tier) return;
     setSavingId(u.uid);
     try {
-      await setUserTier(u.uid, tier);
-      setUsers((list) => list.map((x) => (x.uid === u.uid ? { ...x, tier } : x)));
-      setToast(`${u.email || u.uid} → ${TIER_LABELS[tier]}`);
+      await setUserTier(u.uid, tier); // lock defaults to true
+      setUsers((list) => list.map((x) => (x.uid === u.uid ? { ...x, tier, adminTierLock: true } : x)));
+      setToast(`${u.email || u.uid} → ${TIER_LABELS[tier]} (locked)`);
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  // Toggle whether the tier is admin-locked (Stripe ignored) or Stripe-managed.
+  async function toggleLock(u: UserProfile) {
+    const next = !u.adminTierLock;
+    setSavingId(u.uid);
+    try {
+      await setUserTierLock(u.uid, next);
+      setUsers((list) => list.map((x) => (x.uid === u.uid ? { ...x, adminTierLock: next } : x)));
+      setToast(next ? "Tier locked — Stripe won't change it" : "Tier unlocked — Stripe now manages it");
     } finally {
       setSavingId(null);
     }
@@ -46,10 +60,11 @@ export default function UsersAdmin() {
         <h1 className={styles.pageTitle}>Users</h1>
       </div>
 
-      <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 28, maxWidth: 620 }}>
+      <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 28, maxWidth: 660 }}>
         Each user is assigned a random set of works on first sign-in. Tier 0 sees 5, tier 1 sees 15,
-        tier 2 sees the full collection. Set the tier manually here until subscriptions drive it
-        automatically. Profiles appear once a user has signed in at least once.
+        tier 2 sees the full collection. Setting a tier here <strong>locks</strong> it — Stripe
+        subscriptions won&apos;t change a locked tier. Unlock to hand control back to Stripe (the
+        user&apos;s subscription then drives their tier). Profiles appear once a user has signed in.
       </p>
 
       {loading ? (
@@ -65,6 +80,7 @@ export default function UsersAdmin() {
                 <th>Joined</th>
                 <th style={{ width: 70 }}>Works</th>
                 <th style={{ width: 220 }}>Tier</th>
+                <th style={{ width: 150 }}>Source</th>
               </tr>
             </thead>
             <tbody>
@@ -95,6 +111,19 @@ export default function UsersAdmin() {
                         <option value={1}>{TIER_LABELS[1]}</option>
                         <option value={2}>{TIER_LABELS[2]}</option>
                       </select>
+                    </td>
+                    <td>
+                      <button
+                        className={styles.btnEdit}
+                        disabled={savingId === u.uid}
+                        onClick={() => toggleLock(u)}
+                        title={u.adminTierLock
+                          ? "Admin-locked — Stripe can't change this tier. Click to let Stripe manage it."
+                          : "Stripe-managed — the subscription drives this tier. Click to lock it."}
+                        style={{ color: u.adminTierLock ? "var(--ink)" : "var(--muted)" }}
+                      >
+                        {u.adminTierLock ? "🔒 Admin lock" : "Stripe-managed"}
+                      </button>
                     </td>
                   </tr>
                 );

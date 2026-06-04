@@ -55,7 +55,9 @@ service cloud.firestore {
       allow update: if isAdmin() ||
         (request.auth != null &&
          request.auth.uid == uid &&
-         request.resource.data.tier == resource.data.tier);
+         request.resource.data.tier == resource.data.tier &&
+         request.resource.data.get('adminTierLock', false) ==
+           resource.data.get('adminTierLock', false));
       allow delete: if false;
     }
 

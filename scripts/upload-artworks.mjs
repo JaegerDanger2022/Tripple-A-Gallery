@@ -130,5 +130,5 @@ for (const filename of sorted) {
 
 console.log(`\n✓ Done — ${files.length} artworks uploaded and seeded in Firestore.\n`);
 console.log("Next steps:");
-console.log("  1. Go to /admin/artworks to set prices, categories, and medium for each lot.");
+console.log("  1. Go to /aaa-ops-92x4k1/artworks to set prices, categories, and medium for each lot.");
 console.log("  2. Deploy Firestore + Storage rules:  firebase deploy --only firestore:rules,storage\n");

@@ -107,9 +107,27 @@ stripe trigger customer.subscription.updated
 On downgrade the user's stored 5/15 random works are untouched, so they revert
 to exactly what they originally had.
 
-## Admin override
+## Admin override (always wins over Stripe)
 
-You can set any user's tier manually at **/admin/users**. This write is allowed
-by the Firestore rules only for accounts listed in the `admins` collection
-(`isAdmin()`); regular users still cannot change their own `tier`. Handy for
-granting access before — or independently of — Stripe.
+You can set any user's tier manually at **/aaa-ops-92x4k1/users** (the admin
+panel — the obscured route is intentional). This write is allowed
+by the Firestore rules only for accounts in the `admins` collection
+(`isAdmin()`); regular users can never change their own `tier` or lock.
+
+**How it interacts with Stripe — the admin lock:**
+
+- Setting a tier in the admin page **locks** it (`adminTierLock: true`). While
+  locked, Stripe fulfilment (the confirm redirect *and* the webhook) will
+  **not** change that user's tier — your override always wins, even if they have
+  an active paid subscription or it later renews/cancels.
+- The **Source** column shows each user's state:
+  - **🔒 Admin lock** — tier is pinned by you; Stripe is ignored.
+  - **Stripe-managed** — the user's subscription drives their tier (the normal
+    automated path).
+- Click the Source button to toggle. **Unlocking** hands control back to Stripe:
+  the user's tier will then follow their subscription on the next event (so an
+  active subscriber returns to their paid tier; a non-subscriber drops to 0 when
+  their next relevant event fires, or stays as-is until then).
+
+Use the lock for comps, gifts, staff accounts, or refunds where you want a tier
+regardless of payment. Use Stripe-managed (unlocked) for normal paying members.

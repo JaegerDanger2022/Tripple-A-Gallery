@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { stripe, tierForPriceId } from "@/lib/stripe";
-import { adminSetTier, adminLinkStripe } from "@/lib/userAdmin";
+import { adminSetTier, adminLinkStripe, adminIsTierLocked } from "@/lib/userAdmin";
 import type { Tier } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -63,11 +63,18 @@ export async function POST(req: NextRequest) {
   const subscriptionId =
     typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
 
-  await adminSetTier(uid, tier);
+  // Always record the Stripe link so the subscription is tracked.
   await adminLinkStripe(uid, {
     stripeCustomerId: customerId,
     stripeSubscriptionId: subscriptionId,
   });
 
+  // Respect the admin lock — if an admin has pinned this user's tier, a payment
+  // does NOT override it. (Edge case; surfaced so the client can explain.)
+  if (await adminIsTierLocked(uid)) {
+    return NextResponse.json({ ok: true, tier: null, locked: true });
+  }
+
+  await adminSetTier(uid, tier);
   return NextResponse.json({ ok: true, tier });
 }

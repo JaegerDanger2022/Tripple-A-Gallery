@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe, tierForPriceId } from "@/lib/stripe";
-import { adminSetTier, adminLinkStripe, adminUidForCustomer } from "@/lib/userAdmin";
+import { adminSetTier, adminLinkStripe, adminUidForCustomer, adminIsTierLocked } from "@/lib/userAdmin";
 import type { Tier } from "@/lib/types";
 
 // Must read the raw body for signature verification — Node runtime, no caching.
@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         const uid = await uidFromSubscription(sub);
-        if (uid) await adminSetTier(uid, 0);
+        // Respect the admin lock — a locked tier is never changed by Stripe.
+        if (uid && !(await adminIsTierLocked(uid))) await adminSetTier(uid, 0);
         break;
       }
       default:
@@ -73,6 +74,14 @@ async function applySubscription(sub: Stripe.Subscription): Promise<void> {
   const uid = await uidFromSubscription(sub);
   if (!uid) return;
 
+  // Always keep the Stripe link current so future events map back to this uid,
+  // even when the tier itself is admin-locked.
+  const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+  await adminLinkStripe(uid, { stripeCustomerId: customerId, stripeSubscriptionId: sub.id });
+
+  // Respect the admin lock — the manually-set tier wins over Stripe.
+  if (await adminIsTierLocked(uid)) return;
+
   // Active/trialing → grant the tier for the subscription's price. Anything else
   // (past_due, canceled, unpaid, incomplete_expired) → drop to tier 0.
   const active = sub.status === "active" || sub.status === "trialing";
@@ -80,6 +89,4 @@ async function applySubscription(sub: Stripe.Subscription): Promise<void> {
   const tier: Tier = active ? (tierForPriceId(priceId) ?? 0) : 0;
 
   await adminSetTier(uid, tier);
-  const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-  await adminLinkStripe(uid, { stripeCustomerId: customerId, stripeSubscriptionId: sub.id });
 }
