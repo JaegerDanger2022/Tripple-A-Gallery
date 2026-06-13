@@ -4,6 +4,7 @@ import {
   doc,
   getDocs,
   getDoc,
+  getDocFromServer,
   addDoc,
   setDoc,
   updateDoc,
@@ -192,6 +193,22 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   const snap = await getDoc(doc(db, "users", uid));
   if (!snap.exists()) return null;
   return { uid: snap.id, ...snap.data() } as UserProfile;
+}
+
+/**
+ * Like getUserProfile but forces a SERVER read (bypasses the client cache).
+ * Used right after Stripe fulfilment, where the tier was just written by the
+ * Admin SDK and a cached read would still show the old tier. Falls back to the
+ * cache-tolerant read if the server is briefly unreachable.
+ */
+export async function getUserProfileFresh(uid: string): Promise<UserProfile | null> {
+  try {
+    const snap = await getDocFromServer(doc(db, "users", uid));
+    if (!snap.exists()) return null;
+    return { uid: snap.id, ...snap.data() } as UserProfile;
+  } catch {
+    return getUserProfile(uid);
+  }
 }
 
 /**

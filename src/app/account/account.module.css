@@ -18,11 +18,18 @@
 }
 .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); opacity: 0.6; }
 .signOut {
-  margin-left: auto; font-family: var(--f-mono); font-size: 11px;
-  color: var(--muted); letter-spacing: 0.06em; padding: 4px 0;
-  border-bottom: 1px solid var(--line);
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em;
+  color: var(--ink);
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
-.signOut:hover { color: var(--ink); border-color: var(--ink); }
+.signOut:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.signOut svg { flex-shrink: 0; }
 
 /* Signed-out prompt */
 .signedOut {

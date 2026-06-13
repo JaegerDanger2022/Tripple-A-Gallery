@@ -10,7 +10,7 @@ import {
   User,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { ensureUserProfile } from "@/lib/firestore";
+import { ensureUserProfile, getUserProfileFresh } from "@/lib/firestore";
 import type { UserProfile } from "@/lib/types";
 
 interface AuthContextValue {
@@ -22,6 +22,7 @@ interface AuthContextValue {
   profileLoading: boolean;
   refreshProfile: () => Promise<void>;
   authModalOpen: boolean;
+  authModalMode: "signin" | "signup";
   openAuthModal: (mode?: "signin" | "signup") => void;
   closeAuthModal: () => void;
   signIn: (email: string, password: string) => Promise<void>;
@@ -38,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [, setModalMode] = useState<"signin" | "signup">("signin");
+  const [authModalMode, setModalMode] = useState<"signin" | "signup">("signin");
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
@@ -67,10 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function refreshProfile() {
     if (!user) return;
     try {
-      const p = await ensureUserProfile(user.uid, user.email ?? "");
+      // Force a server read — the caller (e.g. post-Stripe fulfilment) needs the
+      // tier just written by the Admin SDK, which a cached read would miss.
+      const p = (await getUserProfileFresh(user.uid)) ??
+        (await ensureUserProfile(user.uid, user.email ?? ""));
       setProfile(p);
     } catch {
-      setProfile(null);
+      // Keep whatever profile we already have rather than blanking it.
     }
   }
 
@@ -98,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, authLoading, profile, profileLoading, refreshProfile, authModalOpen, openAuthModal, closeAuthModal, signIn, signUp, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, authLoading, profile, profileLoading, refreshProfile, authModalOpen, authModalMode, openAuthModal, closeAuthModal, signIn, signUp, signOut, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

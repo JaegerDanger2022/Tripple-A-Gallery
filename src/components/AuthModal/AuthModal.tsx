@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./AuthModal.module.css";
 
 export default function AuthModal() {
-  const { authModalOpen, closeAuthModal, signIn, signUp, resetPassword } = useAuth();
+  const { authModalOpen, authModalMode, closeAuthModal, signIn, signUp, resetPassword } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup" | "reset">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,6 +13,11 @@ export default function AuthModal() {
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Open on the tab the caller asked for (e.g. "Sign up" in the header).
+  useEffect(() => {
+    if (authModalOpen) setMode(authModalMode);
+  }, [authModalOpen, authModalMode]);
 
   if (!authModalOpen) return null;
 

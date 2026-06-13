@@ -47,7 +47,8 @@
       "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND httpRequest.requestUrl:\"/api/stripe/confirm\"' --project tripple-a-gallery --limit 10 --freshness=20m --format=\"table\\(timestamp,httpRequest.status,httpRequest.latency\\)\" 2>&1)",
       "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND logName=\"projects/tripple-a-gallery/logs/run.googleapis.com%2Fstderr\"' --project tripple-a-gallery --limit 15 --freshness=20m --format=\"value\\(timestamp,textPayload\\)\" 2>&1)",
       "PowerShell(\"=== confirm requests last 20m \\(status + latency\\) ===\")",
-      "PowerShell(\"`n=== app stderr errors last 20m ===\")"
+      "PowerShell(\"`n=== app stderr errors last 20m ===\")",
+      "PowerShell(node \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\_diag-session.mjs\" \"cs_test_b1fsDlxU0lgROw3GPQXjpqRFM8VGDmE15A993As2W3fSP9GA7JPiOZrwyK\" 2>&1)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

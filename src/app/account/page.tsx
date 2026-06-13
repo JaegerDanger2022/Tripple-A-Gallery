@@ -45,6 +45,11 @@ function AccountInner() {
     if (confirmedSession.current === sessionId) return;
     confirmedSession.current = sessionId;
 
+    // Strip ?upgrade/session_id from the URL up front, synchronously, so a page
+    // refresh can never re-trigger confirmation. (router.replace went through
+    // the Next router and didn't reliably stick on App Hosting — this does.)
+    window.history.replaceState(null, "", "/account");
+
     let live = true;
     (async () => {
       setUpgradeMsg("Confirming your upgrade…");
@@ -58,28 +63,20 @@ function AccountInner() {
         const body = await res.json().catch(() => ({}));
         if (!live) return;
         if (res.ok) {
-          // The server already granted the tier and returned it — show success
-          // immediately. Refresh the local profile in the background; a slow or
-          // hanging Firestore client read must NEVER leave us stuck on
-          // "Confirming…", so it is best-effort and not awaited here.
-          setUpgradeMsg(
-            body.locked
-              ? "Payment received. Your access is set by the studio and won't change automatically."
-              : "Upgrade complete — your access has been updated."
-          );
+          // Show success immediately, then refresh the profile so the membership
+          // card reflects the new tier. refreshProfile is best-effort (not
+          // awaited) so a slow/hanging Firestore client read can't freeze the UI.
+          setUpgradeMsg("Upgrade complete — your access has been updated.");
           void refreshProfile();
         } else {
           setUpgradeMsg(body.error || "We couldn't confirm the upgrade. If you were charged, contact the studio.");
         }
       } catch {
         if (live) setUpgradeMsg("We couldn't confirm the upgrade. Please refresh.");
-      } finally {
-        // Clean the query params so a refresh doesn't re-run confirmation.
-        if (live) router.replace("/account");
       }
     })();
     return () => { live = false; };
-  }, [authLoading, user, searchParams, refreshProfile, router]);
+  }, [authLoading, user, searchParams, refreshProfile]);
 
   // Gated download: exchange the user's ID token for a short-lived signed URL,
   // then hand the browser off to it. The hi-res file is never publicly linked.
@@ -135,8 +132,8 @@ function AccountInner() {
         <div className={styles.signedOut}>
           <p>Your orders, receipts and digital downloads live here once you sign in.</p>
           <div className={styles.signedOutActions}>
-            <button className="primary" onClick={() => openAuthModal("signin")}>Sign in</button>
-            <button className="ghost" onClick={() => openAuthModal("signup")}>Create account</button>
+            <button className="primary" onClick={() => openAuthModal("signup")}>Create account</button>
+            <button className="ghost" onClick={() => openAuthModal("signin")}>Sign in</button>
           </div>
         </div>
       </main>
@@ -162,7 +159,12 @@ function AccountInner() {
               <span>£{totalSpent.toLocaleString()} lifetime</span>
             </>
           )}
-          <button className={styles.signOut} onClick={() => signOut()}>Sign out</button>
+          <button className={styles.signOut} onClick={() => signOut()} title="Sign out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign out
+          </button>
         </div>
       </section>
 
