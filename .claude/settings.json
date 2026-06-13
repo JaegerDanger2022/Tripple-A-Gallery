@@ -30,7 +30,9 @@
       "PowerShell(npm run lint 2>&1)",
       "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\)\")",
       "PowerShell(npx eslint src/app/pricing/page.tsx src/app/api/stripe/prices/route.ts src/lib/stripe.ts 2>&1)",
-      "PowerShell(node \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\_diag-prices.mjs\" 2>&1)"
+      "PowerShell(node \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\_diag-prices.mjs\" 2>&1)",
+      "WebFetch(domain:firebase.google.com)",
+      "PowerShell(firebase apphosting:backends:list --project tripple-a-gallery 2>&1)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

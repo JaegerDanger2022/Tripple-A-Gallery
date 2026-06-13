@@ -20,3 +20,22 @@ env:
     value: 1:900118498830:web:0140f0e162204ea328b65f
   - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
     value: G-T5Y0DF8H2P
+
+  # ── Stripe ────────────────────────────────────────────────────────────────
+  # Price IDs are not sensitive — safe as plaintext. (Test-mode IDs for now.)
+  - variable: STRIPE_PRICE_TIER1_MONTHLY
+    value: price_1ThvrrCgMLH7jdHOF7Evlxzk
+  - variable: STRIPE_PRICE_TIER1_YEARLY
+    value: price_1Thvz6CgMLH7jdHO8qvgAgyl
+  - variable: STRIPE_PRICE_TIER2_MONTHLY
+    value: price_1ThvsbCgMLH7jdHOiHSbVmh4
+  - variable: STRIPE_PRICE_TIER2_YEARLY
+    value: price_1ThvuyCgMLH7jdHOfitx1AP1
+
+  # Secrets — values live in Cloud Secret Manager, never in this file/repo.
+  # Create them in the Firebase Console (or `firebase apphosting:secrets:set`),
+  # then `firebase apphosting:secrets:grantaccess` so the backend can read them.
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
