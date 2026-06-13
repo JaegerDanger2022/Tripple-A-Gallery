@@ -36,7 +36,14 @@
       "PowerShell(firebase apphosting:secrets:describe STRIPE_WEBHOOK_SECRET --project tripple-a-gallery 2>&1)",
       "PowerShell(gcloud secrets list --project tripple-a-gallery --format=\"value\\(name\\)\" 2>&1)",
       "PowerShell(\"--- describe STRIPE_WEBHOOK_SECRET ---\")",
-      "PowerShell(\"`n--- all secrets in project \\(gcloud\\) ---\")"
+      "PowerShell(\"`n--- all secrets in project \\(gcloud\\) ---\")",
+      "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND \\(textPayload:\"confirm\" OR textPayload:\"stripe\" OR severity>=ERROR\\)' --project tripple-a-gallery --limit 30 --freshness=1h --format=\"table\\(timestamp,severity,textPayload\\)\" 2>&1)",
+      "PowerShell(\"=== recent App Hosting / Cloud Run logs for confirm route errors ===\")",
+      "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND logName=\"projects/tripple-a-gallery/logs/run.googleapis.com%2Fstderr\"' --project tripple-a-gallery --limit 25 --freshness=30m --format=\"value\\(timestamp,textPayload\\)\" 2>&1)",
+      "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND logName=\"projects/tripple-a-gallery/logs/run.googleapis.com%2Fstdout\"' --project tripple-a-gallery --limit 25 --freshness=30m --format=\"value\\(timestamp,textPayload\\)\" 2>&1)",
+      "PowerShell(\"=== stdout/stderr app logs \\(not request logs\\) last 30m, looking for thrown errors ===\")",
+      "PowerShell(\"`n=== also stdout ===\")",
+      "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND httpRequest.requestUrl:\"/api/stripe/confirm\"' --project tripple-a-gallery --limit 10 --freshness=40m --format=\"table\\(timestamp,httpRequest.status,httpRequest.requestMethod\\)\" 2>&1)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

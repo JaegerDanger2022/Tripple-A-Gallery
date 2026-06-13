@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { TIER_LABELS } from "@/lib/tier";
@@ -29,6 +29,10 @@ function AccountInner() {
   const [downloadErr, setDownloadErr] = useState("");
   // Upgrade fulfilment status, driven by the ?upgrade=success&session_id=… redirect.
   const [upgradeMsg, setUpgradeMsg] = useState("");
+  // Guard: confirm each session exactly once. Without this the effect re-fires
+  // when refreshProfile() changes context (new deps), looping the POST and
+  // flashing the message before router.replace can clear the query params.
+  const confirmedSession = useRef<string | null>(null);
 
   // After returning from Stripe Checkout, confirm the session server-side (which
   // grants the tier via the Admin SDK), then refresh the local profile.
@@ -37,6 +41,9 @@ function AccountInner() {
     if (searchParams.get("upgrade") !== "success") return;
     const sessionId = searchParams.get("session_id");
     if (!sessionId) return;
+    // Already handled (or in flight) for this session — don't run again.
+    if (confirmedSession.current === sessionId) return;
+    confirmedSession.current = sessionId;
 
     let live = true;
     (async () => {
