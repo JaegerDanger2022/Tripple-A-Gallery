@@ -58,8 +58,16 @@ function AccountInner() {
         const body = await res.json().catch(() => ({}));
         if (!live) return;
         if (res.ok) {
-          await refreshProfile();
-          setUpgradeMsg("Upgrade complete — your access has been updated.");
+          // The server already granted the tier and returned it — show success
+          // immediately. Refresh the local profile in the background; a slow or
+          // hanging Firestore client read must NEVER leave us stuck on
+          // "Confirming…", so it is best-effort and not awaited here.
+          setUpgradeMsg(
+            body.locked
+              ? "Payment received. Your access is set by the studio and won't change automatically."
+              : "Upgrade complete — your access has been updated."
+          );
+          void refreshProfile();
         } else {
           setUpgradeMsg(body.error || "We couldn't confirm the upgrade. If you were charged, contact the studio.");
         }
