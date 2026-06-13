@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Patron membership">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1714"/>
+      <stop offset="1" stop-color="#0b0a08"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3d98c"/>
+      <stop offset="0.5" stop-color="#d4af37"/>
+      <stop offset="1" stop-color="#a87d22"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <rect x="36" y="36" width="728" height="728" fill="none" stroke="url(#gold)" stroke-width="3" opacity="0.7"/>
+  <rect x="52" y="52" width="696" height="696" fill="none" stroke="url(#gold)" stroke-width="1" opacity="0.35"/>
+
+  <!-- corner flourishes -->
+  <g stroke="url(#gold)" stroke-width="2" fill="none" opacity="0.6">
+    <path d="M52 92 L52 52 L92 52"/>
+    <path d="M708 52 L748 52 L748 92"/>
+    <path d="M748 708 L748 748 L708 748"/>
+    <path d="M92 748 L52 748 L52 708"/>
+  </g>
+
+  <!-- emblem: laurel-crowned monogram = the full collection / patron -->
+  <g transform="translate(400 300)">
+    <circle cx="0" cy="0" r="92" fill="none" stroke="url(#gold)" stroke-width="3" opacity="0.5"/>
+    <g fill="none" stroke="url(#gold)" stroke-width="5" stroke-linecap="round">
+      <!-- left laurel -->
+      <path d="M-70 70 C-110 30 -110 -30 -78 -64" opacity="0.85"/>
+      <path d="M-92 36 l-22 -6 M-100 8 l-23 -2 M-96 -22 l-22 4 M-82 -50 l-19 10" opacity="0.85"/>
+      <!-- right laurel -->
+      <path d="M70 70 C110 30 110 -30 78 -64" opacity="0.85"/>
+      <path d="M92 36 l22 -6 M100 8 l23 -2 M96 -22 l22 4 M82 -50 l19 10" opacity="0.85"/>
+      <!-- star at crown -->
+      <path d="M0 -86 l9 18 l20 3 l-14 14 l3 20 l-18 -10 l-18 10 l3 -20 l-14 -14 l20 -3 z" fill="url(#gold)" stroke="none"/>
+    </g>
+    <text x="0" y="22" text-anchor="middle" font-family="Georgia, serif" font-size="72"
+          fill="url(#gold)" letter-spacing="2">AAA</text>
+  </g>
+
+  <text x="400" y="540" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="82" letter-spacing="6" fill="url(#gold)">Patron</text>
+  <text x="400" y="592" text-anchor="middle" font-family="Georgia, serif"
+        font-size="26" letter-spacing="10" fill="#d8c590" opacity="0.85">MEMBERSHIP</text>
+
+  <line x1="320" y1="628" x2="480" y2="628" stroke="url(#gold)" stroke-width="1.5" opacity="0.65"/>
+  <text x="400" y="676" text-anchor="middle" font-family="Georgia, serif"
+        font-size="24" letter-spacing="2" fill="#a8946a" opacity="0.9">The full collection</text>
+
+  <text x="400" y="734" text-anchor="middle" font-family="Georgia, serif"
+        font-size="20" letter-spacing="6" fill="#7a6c48" opacity="0.75">TRIPLE A GALLERY</text>
+</svg>

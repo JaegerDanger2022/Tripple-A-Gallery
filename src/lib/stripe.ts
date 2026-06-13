@@ -57,3 +57,52 @@ export function tierForPriceId(priceId: string | null | undefined): Tier | null 
   }
   return null;
 }
+
+// ── Live price display ───────────────────────────────────────────────────────
+// The /pricing page shows the real amounts from Stripe (it's display-only — the
+// charge is always the Stripe price). Amounts are minor units (pence) as Stripe
+// returns them; the client formats with Intl using `currency`.
+
+/** A single tier's amounts, looked up live from Stripe. */
+export interface TierPricing {
+  month: { amount: number; currency: string } | null;
+  year: { amount: number; currency: string } | null;
+}
+
+/** Live amounts for both paid tiers, keyed by tier. Missing/unconfigured prices
+ *  come back as null so the page can degrade gracefully rather than throw. */
+export type PricingResponse = Record<1 | 2, TierPricing>;
+
+/**
+ * Fetch the configured prices from Stripe for display. Looks up each of the four
+ * price IDs and returns its unit amount + currency. Any price that isn't
+ * configured, can't be fetched, or has no fixed unit amount is returned as null.
+ */
+export async function fetchTierPricing(): Promise<PricingResponse> {
+  const empty: TierPricing = { month: null, year: null };
+  const result: PricingResponse = { 1: { ...empty }, 2: { ...empty } };
+
+  const lookups: Array<{ tier: 1 | 2; interval: BillingInterval; id: string }> = [];
+  for (const tier of [1, 2] as const) {
+    for (const interval of ["month", "year"] as const) {
+      const id = PRICE_IDS[tier][interval];
+      if (id) lookups.push({ tier, interval, id });
+    }
+  }
+
+  await Promise.all(
+    lookups.map(async ({ tier, interval, id }) => {
+      try {
+        const price = await stripe.prices.retrieve(id);
+        // unit_amount is null for metered/tiered prices — we only show fixed ones.
+        if (price.unit_amount != null) {
+          result[tier][interval] = { amount: price.unit_amount, currency: price.currency };
+        }
+      } catch {
+        // Leave as null — a single bad ID shouldn't break the whole page.
+      }
+    })
+  );
+
+  return result;
+}

@@ -100,6 +100,14 @@ export default function ArtistPage() {
         <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/video.mp4" label="Watch" modal />
       </section>
 
+      {/* Award */}
+      <section className={styles.videoSection}>
+        <div className={styles.videoLabel}>
+          <div className="kicker">Award</div>
+        </div>
+        <VideoPlayer src="https://storage.googleapis.com/tripple-a-gallery.firebasestorage.app/videos/award.mp4" label="Watch" modal />
+      </section>
+
       {/* Artist at Work videos */}
       <section className={styles.videoGrid}>
         <div className={styles.videoGridLabel}>

@@ -1,12 +1,23 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import type { PricingResponse } from "@/lib/stripe";
 import styles from "./pricing.module.css";
 
 type Interval = "month" | "year";
+
+// Format a Stripe minor-unit amount (e.g. 499 pence) as a localized price.
+function fmtAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    // Drop the .00 on whole amounts, keep pence otherwise (£54 vs £53.99).
+    minimumFractionDigits: amount % 100 === 0 ? 0 : 2,
+  }).format(amount / 100);
+}
 
 interface PlanTier {
   tier: 0 | 1 | 2;
@@ -61,7 +72,48 @@ function PricingInner() {
   const [loadingTier, setLoadingTier] = useState<number | null>(null);
   const [err, setErr] = useState("");
 
+  // Live prices from Stripe (display-only). null while loading / if unavailable.
+  const [pricing, setPricing] = useState<PricingResponse | null>(null);
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/stripe/prices");
+        const body = await res.json().catch(() => ({}));
+        if (live && res.ok && body.pricing) setPricing(body.pricing as PricingResponse);
+      } catch {
+        // Leave prices hidden — the page still works as a plan comparison.
+      }
+    })();
+    return () => { live = false; };
+  }, []);
+
   const currentTier = profile?.tier ?? 0;
+
+  // The price label for a paid tier at the selected interval, e.g. "£4.99".
+  function priceLabel(tier: 0 | 1 | 2): string | null {
+    if (tier !== 1 && tier !== 2) return null;
+    const p = pricing?.[tier]?.[interval];
+    return p ? fmtAmount(p.amount, p.currency) : null;
+  }
+
+  // Real yearly saving vs paying monthly for 12 months, as a rounded %.
+  // Returns null unless both prices are known and yearly is actually cheaper.
+  function yearlySavingPct(): number | null {
+    if (!pricing) return null;
+    let best = 0;
+    for (const tier of [1, 2] as const) {
+      const m = pricing[tier]?.month;
+      const y = pricing[tier]?.year;
+      if (!m || !y || m.currency !== y.currency) continue;
+      const monthlyAnnual = m.amount * 12;
+      if (monthlyAnnual <= y.amount) continue;
+      const pct = Math.round(((monthlyAnnual - y.amount) / monthlyAnnual) * 100);
+      if (pct > best) best = pct;
+    }
+    return best > 0 ? best : null;
+  }
+  const savePct = yearlySavingPct();
 
   async function startCheckout(tier: 1 | 2) {
     setErr("");
@@ -109,7 +161,8 @@ function PricingInner() {
             className={interval === "year" ? styles.toggleOn : ""}
             onClick={() => setInterval("year")}
           >
-            Yearly <span className={styles.save}>save</span>
+            Yearly{" "}
+            <span className={styles.save}>{savePct ? `save ${savePct}%` : "save"}</span>
           </button>
         </div>
 
@@ -121,12 +174,27 @@ function PricingInner() {
         {TIERS.map((t) => {
           const isCurrent = currentTier === t.tier;
           const isDowngrade = t.tier < currentTier;
+          const price = priceLabel(t.tier);
           return (
             <div key={t.tier} className={`${styles.card} ${t.tier === 1 ? styles.cardFeatured : ""}`}>
               <div className={styles.cardHd}>
                 <span className={styles.tierName}>{t.name}</span>
                 <span className={styles.tierWorks}>{t.works}</span>
               </div>
+
+              <div className={styles.priceRow}>
+                {!t.paid ? (
+                  <span className={styles.priceAmount}>Free</span>
+                ) : price ? (
+                  <>
+                    <span className={styles.priceAmount}>{price}</span>
+                    <span className={styles.pricePer}>/{interval === "month" ? "mo" : "yr"}</span>
+                  </>
+                ) : (
+                  <span className={styles.pricePending}>—</span>
+                )}
+              </div>
+
               <p className={styles.cardBlurb}>{t.blurb}</p>
 
               <ul className={styles.featureList}>

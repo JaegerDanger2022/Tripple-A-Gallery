@@ -1,0 +1,205 @@
+/* not-found.module.css — gallery 404: a crooked, empty frame on the wall */
+
+.wrap {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 80px var(--pad);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .wrap { gap: 32px; padding: 56px var(--pad); min-height: calc(100vh - 160px); }
+}
+
+/* ── The hanging frame ───────────────────────────────────────────────── */
+.frameWrap {
+  position: relative;
+  /* The nail the frame hangs from is the transform origin. */
+  transform-origin: 50% -28px;
+  animation: sway 6s ease-in-out infinite;
+}
+
+/* The "nail" + wire */
+.frameWrap::before {
+  content: "";
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.frameWrap::after {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  width: 1px;
+  height: 30px;
+  margin-left: 0;
+  background: color-mix(in oklab, var(--ink) 30%, transparent);
+  transform-origin: top center;
+  transform: translateX(-0.5px) rotate(0deg);
+}
+
+.frame {
+  position: relative;
+  width: 260px;
+  height: 320px;
+  background: var(--surface);
+  border: 10px solid var(--ink);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--ink) 40%, transparent) inset,
+    0 24px 48px -24px rgba(0, 0, 0, 0.45);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .frame { width: 200px; height: 250px; border-width: 8px; }
+}
+
+/* Inner mat / canvas where the artwork *should* be */
+.canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: color-mix(in oklab, var(--bg) 70%, var(--surface));
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* The "404" sitting where the painting was */
+.numberMark {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 88px;
+  line-height: 1;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+@media (max-width: 640px) {
+  .numberMark { font-size: 64px; }
+}
+
+/* Slow shimmer sweeping across the empty canvas, like light on bare wall */
+.canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    color-mix(in oklab, #ffffff 55%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  animation: shimmer 5.5s ease-in-out infinite;
+}
+
+/* Little "removed" picture-hook label below */
+.tag {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Copy ─────────────────────────────────────────────────────────────── */
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 460px;
+}
+
+.title {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.1;
+}
+.title em { color: var(--accent); }
+
+.lead {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.15s, transform 0.15s;
+}
+.cta:hover { transform: translateY(-1px); }
+.cta svg { transition: transform 0.2s; }
+.cta:hover svg { transform: translateX(3px); }
+
+.ghostCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ghostCta:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ── Animations ───────────────────────────────────────────────────────── */
+@keyframes sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-120%); }
+  60%  { transform: translateX(120%); }
+  100% { transform: translateX(120%); }
+}
+
+/* Respect reduced-motion: settle the frame straight, drop the shimmer. */
+@media (prefers-reduced-motion: reduce) {
+  .frameWrap { animation: none; transform: rotate(0deg); }
+  .canvas::after { animation: none; opacity: 0; }
+  .cta:hover svg { transform: none; }
+}

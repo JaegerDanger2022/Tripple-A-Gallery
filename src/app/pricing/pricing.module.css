@@ -69,6 +69,11 @@
 .cardHd { display: flex; flex-direction: column; gap: 4px; }
 .tierName { font-family: var(--f-display); font-size: 22px; }
 .tierWorks { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.priceRow { display: flex; align-items: baseline; gap: 4px; min-height: 34px; }
+.priceAmount { font-family: var(--f-display); font-size: 30px; line-height: 1; letter-spacing: -0.01em; }
+.pricePer { font-size: 13px; color: var(--muted); }
+.pricePending { font-size: 30px; color: var(--line); }
+
 .cardBlurb { color: var(--muted); font-size: 14px; line-height: 1.55; min-height: 44px; }
 
 .featureList { display: flex; flex-direction: column; gap: 10px; flex: 1; }
