@@ -32,7 +32,11 @@
       "PowerShell(npx eslint src/app/pricing/page.tsx src/app/api/stripe/prices/route.ts src/lib/stripe.ts 2>&1)",
       "PowerShell(node \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\_diag-prices.mjs\" 2>&1)",
       "WebFetch(domain:firebase.google.com)",
-      "PowerShell(firebase apphosting:backends:list --project tripple-a-gallery 2>&1)"
+      "PowerShell(firebase apphosting:backends:list --project tripple-a-gallery 2>&1)",
+      "PowerShell(firebase apphosting:secrets:describe STRIPE_WEBHOOK_SECRET --project tripple-a-gallery 2>&1)",
+      "PowerShell(gcloud secrets list --project tripple-a-gallery --format=\"value\\(name\\)\" 2>&1)",
+      "PowerShell(\"--- describe STRIPE_WEBHOOK_SECRET ---\")",
+      "PowerShell(\"`n--- all secrets in project \\(gcloud\\) ---\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"
