@@ -21,6 +21,11 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
     value: G-T5Y0DF8H2P
 
+  # Public site origin — used to build Stripe redirect URLs. The server binds to
+  # 0.0.0.0:8080 internally, so this must be the real public domain.
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://tripleagallery.com
+
   # ── Stripe ────────────────────────────────────────────────────────────────
   # Price IDs are not sensitive — safe as plaintext. (Test-mode IDs for now.)
   - variable: STRIPE_PRICE_TIER1_MONTHLY

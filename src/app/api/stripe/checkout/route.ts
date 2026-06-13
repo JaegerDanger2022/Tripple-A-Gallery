@@ -10,6 +10,22 @@ function bad(msg: string, status = 400) {
   return NextResponse.json({ error: msg }, { status });
 }
 
+// The browser-reachable origin for redirect URLs (see note at the call site).
+function publicOrigin(req: NextRequest): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (configured) return configured;
+
+  // Behind App Hosting's proxy the real host/proto arrive as forwarded headers.
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  if (host && !host.startsWith("0.0.0.0") && !host.startsWith("localhost")) {
+    const proto = req.headers.get("x-forwarded-proto") ?? "https";
+    return `${proto}://${host}`;
+  }
+
+  // Local dev (and anything else): the request's own origin is correct.
+  return req.nextUrl.origin;
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.STRIPE_SECRET_KEY) return bad("Payments are not configured yet.", 503);
 
@@ -43,7 +59,13 @@ export async function POST(req: NextRequest) {
   // 3) Create the subscription Checkout Session. We stash uid + tier in metadata
   //    and client_reference_id so fulfilment (success redirect + webhook) can map
   //    the payment back to the right user and grant exactly the tier they bought.
-  const origin = req.nextUrl.origin;
+  //
+  // Resolve the PUBLIC origin for the redirect URLs. On App Hosting the server
+  // binds to 0.0.0.0:8080 internally, so req.nextUrl.origin is that unreachable
+  // address — Stripe would send the user to http://0.0.0.0:8080. Prefer an
+  // explicit NEXT_PUBLIC_SITE_URL, then the proxy's forwarded host, and only
+  // fall back to nextUrl.origin (correct for local dev).
+  const origin = publicOrigin(req);
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
