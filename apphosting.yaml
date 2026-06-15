@@ -44,3 +44,10 @@ env:
     secret: STRIPE_SECRET_KEY
   - variable: STRIPE_WEBHOOK_SECRET
     secret: STRIPE_WEBHOOK_SECRET
+
+  # ── Email (Resend) ─────────────────────────────────────────────────────────
+  # API key is a secret. Senders/contact have code defaults (orders@, no-reply@,
+  # info@ on tripleagallery.com) — override here only if you want different ones:
+  #   MAIL_FROM_ORDERS, MAIL_FROM_MEMBERSHIP, MAIL_CONTACT
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY

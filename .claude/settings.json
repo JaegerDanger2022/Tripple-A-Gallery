@@ -58,7 +58,14 @@
       "Bash(find . -maxdepth 2 -name \"*.rules\" -not -path \"./node_modules/*\")",
       "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")",
       "Bash(sed -E 's/=.*//' .env.local)",
-      "Bash(grep -vE '^\\\\s*#|^\\\\s*$')"
+      "Bash(grep -vE '^\\\\s*#|^\\\\s*$')",
+      "Bash(node -e \"const {Resend}=require\\('resend'\\); console.log\\('Resend export OK:', typeof Resend\\)\")",
+      "Bash(grep -vE \"node_modules|\\\\.next|/\\\\.git/\")",
+      "Bash(grep -vE \"node_modules|\\\\.next|/\\\\.git/|package-lock\\\\.json\")",
+      "Bash(sed -i 's/trippleagallery\\\\.com/tripleagallery.com/g' src/app/shipping/page.tsx src/emails/email-change.html src/emails/email-verification.html src/emails/mfa-enrollment.html src/emails/password-reset.html)",
+      "Bash(grep -rn \"trippleagallery\\\\.com\" src/)",
+      "Bash(git status *)",
+      "Bash(git ls-files *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

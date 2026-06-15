@@ -1,39 +1,53 @@
-// Transactional email — queued for the Firebase "Trigger Email" extension by
-// writing a document to the mail collection (the extension watches it and sends
-// via the configured SMTP backend). Server-only: uses the Admin SDK.
+// Transactional email — sent directly via Resend. Server-only.
 //
 // Branding mirrors the Firebase Auth templates in src/emails/*.html (Cormorant
 // Garamond display, Geist body, #7a3b2e accent, Tripple A Gallery shell).
-import { adminDb } from "./firebaseAdmin";
-import { FieldValue } from "firebase-admin/firestore";
+import { Resend } from "resend";
 import { TIER_LABELS } from "./tier";
 import type { Order, OrderItem, Tier } from "./types";
 
-// Collection the Trigger Email extension is configured to watch (default "mail").
-const MAIL_COLLECTION = process.env.MAIL_COLLECTION ?? "mail";
-// Optional explicit sender — otherwise the extension's configured default is used.
-const FROM = process.env.MAIL_FROM;
-const REPLY_TO = process.env.MAIL_REPLY_TO ?? "info@trippleagallery.com";
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")) || "https://trippleagallery.com";
+// Per-category senders. All must be on a domain verified in Resend
+// (tripleagallery.com, single-p). Order receipts come from orders@; membership
+// notifications from no-reply@ (automated, not monitored for replies); info@ is
+// the address customers contact us on (shown in every footer).
+const FROM_ORDERS = process.env.MAIL_FROM_ORDERS ?? "Tripple A Gallery <orders@tripleagallery.com>";
+const FROM_MEMBERSHIP = process.env.MAIL_FROM_MEMBERSHIP ?? "Tripple A Gallery <no-reply@tripleagallery.com>";
+const CONTACT_EMAIL = process.env.MAIL_CONTACT ?? "info@tripleagallery.com";
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")) || "https://tripleagallery.com";
 
-interface QueueEmailInput {
+// Lazily construct the Resend client so importing this module never throws when
+// RESEND_API_KEY is absent (e.g. during build). Null when unconfigured.
+let _resend: Resend | null = null;
+function getResend(): Resend | null {
+  if (_resend) return _resend;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  _resend = new Resend(key);
+  return _resend;
+}
+
+interface SendMailInput {
   to: string;
+  from: string;
   subject: string;
   html: string;
   text: string;
+  replyTo?: string;   // omitted for no-reply senders
 }
 
-/** Enqueue one email for the Trigger Email extension to deliver. Best-effort:
- *  callers should not let a mail failure break their main flow. */
-export async function queueEmail({ to, subject, html, text }: QueueEmailInput): Promise<void> {
+/** Send one transactional email via Resend. Best-effort: callers must not let a
+ *  mail failure break their main flow. No-ops (with a warning) when unconfigured. */
+export async function sendMail({ to, from, subject, html, text, replyTo }: SendMailInput): Promise<void> {
   if (!to) return;
-  await adminDb.collection(MAIL_COLLECTION).add({
-    to,
-    ...(FROM ? { from: FROM } : {}),
-    replyTo: REPLY_TO,
-    message: { subject, html, text },
-    createdAt: FieldValue.serverTimestamp(),
+  const resend = getResend();
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY not set — skipping email:", subject);
+    return;
+  }
+  const { error } = await resend.emails.send({
+    from, to, subject, html, text, ...(replyTo ? { replyTo } : {}),
   });
+  if (error) throw new Error(`Resend send failed: ${error.message}`);
 }
 
 // ── Branded HTML shell ───────────────────────────────────────────────────────
@@ -106,7 +120,7 @@ function layout({ eyebrow, heading, bodyHtml, ctaLabel, ctaHref }: LayoutInput):
       ${cta}
     </td></tr>
     <tr><td class="footer">
-      <p class="footer-text">Questions about your order? <a href="mailto:info@trippleagallery.com">info@trippleagallery.com</a></p>
+      <p class="footer-text">Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
       <p class="footer-address">Tripple A Gallery &nbsp;·&nbsp; 167–169 Great Portland Street &nbsp;·&nbsp; London W1W 5PF</p>
     </td></tr>
   </table>
@@ -183,7 +197,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<void> {
     `View your orders: ${SITE_URL}/account`,
   ].filter(Boolean);
 
-  await queueEmail({ to: order.email, subject: `Your Tripple A Gallery order ${order.id}`, html, text: textLines.join("\n") });
+  await sendMail({ to: order.email, from: FROM_ORDERS, replyTo: CONTACT_EMAIL, subject: `Your Tripple A Gallery order ${order.id}`, html, text: textLines.join("\n") });
 }
 
 // ── Subscription / membership changes ────────────────────────────────────────
@@ -245,5 +259,5 @@ export async function sendTierChangeEmail(email: string, from: Tier, to: Tier): 
     cancelled: "Your Tripple A Gallery membership has been cancelled",
   };
 
-  await queueEmail({ to: email, subject: subjectByKind[kind], html, text });
+  await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: subjectByKind[kind], html, text });
 }

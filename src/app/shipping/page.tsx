@@ -29,7 +29,7 @@ export default function ShippingPage() {
 
         <div className={styles.section}>
           <h2>Returns</h2>
-          <p>Prints and editions may be returned within <strong>14 days</strong> of delivery, provided they are returned in original condition and original packaging. To initiate a return, contact the studio at <a href="mailto:studio@trippleagallery.com">studio@trippleagallery.com</a> with your order reference. Return shipping is at the buyer&apos;s expense.</p>
+          <p>Prints and editions may be returned within <strong>14 days</strong> of delivery, provided they are returned in original condition and original packaging. To initiate a return, contact us at <a href="mailto:info@tripleagallery.com">info@tripleagallery.com</a> with your order reference. Return shipping is at the buyer&apos;s expense.</p>
           <p>Original works are final sale. If a work arrives damaged in transit, please photograph the packaging and the work within 24 hours of receipt and contact us immediately — all shipments are fully insured.</p>
         </div>
 
