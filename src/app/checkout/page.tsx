@@ -49,7 +49,7 @@ function SelectField({ label, value, onChange, options, error }: {
 
 export default function CheckoutPage() {
   const { cart, artworks } = useApp();
-  const { user, openAuthModal } = useAuth();
+  const { user, authLoading, openAuthModal } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -133,12 +133,37 @@ export default function CheckoutPage() {
     }
   }
 
+  if (authLoading) {
+    return (
+      <main className={styles.checkout}>
+        <div className={styles.empty}><p className="form-note">Loading…</p></div>
+      </main>
+    );
+  }
+
   if (cart.length === 0) {
     return (
       <main className={styles.checkout}>
         <div className={styles.empty}>
           <h1><em>Your cart is empty.</em></h1>
           <button onClick={() => router.push("/")}>← Back to works</button>
+        </div>
+      </main>
+    );
+  }
+
+  // No guest checkout — orders, receipts and digital downloads are tied to an
+  // account, so a buyer must be signed in before they can pay.
+  if (!user) {
+    return (
+      <main className={styles.checkout}>
+        <div className={styles.empty}>
+          <h1><em>Sign in to check out.</em></h1>
+          <p className="form-note">Your order, receipt and any downloads are saved to your account.</p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+            <button className="primary" onClick={() => openAuthModal("signup")}>Create account</button>
+            <button className="ghost" onClick={() => openAuthModal("signin")}>Sign in</button>
+          </div>
         </div>
       </main>
     );

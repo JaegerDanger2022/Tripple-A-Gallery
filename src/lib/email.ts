@@ -261,3 +261,35 @@ export async function sendTierChangeEmail(email: string, from: Tier, to: Tier): 
 
   await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: subjectByKind[kind], html, text });
 }
+
+// ── Account welcome (free signup) ────────────────────────────────────────────
+
+export async function sendWelcomeEmail(email: string, name?: string): Promise<void> {
+  if (!email) return;
+  const first = (name ?? "").trim().split(/\s+/)[0];
+  const heading = first ? `Welcome, ${first}` : "Welcome to the gallery";
+
+  const bodyHtml = `
+    <p class="body-text">Thank you for creating an account with Tripple A Gallery — home to the original works, collages and mixed-media pieces of Ama Antwiwaa Amponsah.</p>
+    <div class="panel"><p class="panel-label">Your access</p><p class="panel-text">${esc(TIER_LABELS[0])}</p></div>
+    <p class="body-text">Your account is ready. Browse your collection, return to works you love, and unlock the full catalogue anytime by upgrading your membership.</p>`;
+
+  const html = layout({
+    eyebrow: "Welcome",
+    heading,
+    bodyHtml,
+    ctaLabel: "Explore the collection",
+    ctaHref: `${SITE_URL}/`,
+  });
+
+  const text = [
+    `Welcome to Tripple A Gallery`,
+    ``,
+    `Thank you for creating an account. Your access: ${TIER_LABELS[0]}.`,
+    `Upgrade anytime to unlock the full catalogue.`,
+    ``,
+    `Explore the collection: ${SITE_URL}/`,
+  ].join("\n");
+
+  await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: "Welcome to Tripple A Gallery", html, text });
+}

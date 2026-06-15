@@ -5,6 +5,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
   User,
@@ -90,7 +91,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signUp(email: string, password: string) {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    // Both are best-effort and non-blocking — signup shouldn't wait on, or fail
+    // because of, an email. Firebase sends verification (Console template); our
+    // server sends the branded welcome (deduped) via Resend.
+    sendEmailVerification(cred.user).catch(() => {});
+    cred.user
+      .getIdToken()
+      .then((token) =>
+        fetch("/api/account/welcome", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      )
+      .catch(() => {});
   }
 
   async function signOut() {

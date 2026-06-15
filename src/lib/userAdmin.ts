@@ -2,9 +2,26 @@
 // Firestore security rules, so they're the ONLY place `tier` is ever changed —
 // keeping paid access ungrantable from the client.
 import { adminDb } from "./firebaseAdmin";
+import { FieldValue } from "firebase-admin/firestore";
 import type { Tier } from "./types";
 
 const usersDoc = (uid: string) => adminDb.collection("users").doc(uid);
+
+/**
+ * Claim the one-time signup welcome email for a user. Returns true only for the
+ * first caller (transactional), so React re-renders / retries can't resend.
+ * Uses a dedicated `mailFlags` collection so it never races with client-side
+ * profile creation (ensureUserProfile) writing the same user doc.
+ */
+export async function adminClaimWelcomeEmail(uid: string): Promise<boolean> {
+  const ref = adminDb.collection("mailFlags").doc(uid);
+  return adminDb.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (snap.exists && snap.data()?.welcome) return false;
+    tx.set(ref, { welcome: true, welcomeAt: FieldValue.serverTimestamp() }, { merge: true });
+    return true;
+  });
+}
 
 /**
  * Detect a membership change that hasn't been emailed yet. Compares the user's

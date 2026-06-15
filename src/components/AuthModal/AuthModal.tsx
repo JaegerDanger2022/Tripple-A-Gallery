@@ -1,8 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./AuthModal.module.css";
+
+// Password input with its own show/hide toggle. Each instance tracks its own
+// visibility so the password and confirm fields reveal independently.
+function PasswordField({ label, value, onChange }: {
+  label: string; value: string; onChange: (v: string) => void;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <label className="field">
+      <span className="field-lbl">{label}</span>
+      <div className={styles.pwWrap}>
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+          style={{ paddingRight: 40 }}
+        />
+        <button
+          type="button"
+          className={styles.pwToggle}
+          onClick={() => setShow((s) => !s)}
+          aria-label={show ? "Hide password" : "Show password"}
+          aria-pressed={show}
+          title={show ? "Hide password" : "Show password"}
+        >
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
+    </label>
+  );
+}
 
 export default function AuthModal() {
   const { authModalOpen, authModalMode, closeAuthModal, signIn, signUp, resetPassword } = useAuth();
@@ -86,15 +119,9 @@ export default function AuthModal() {
                 <span className="field-lbl">Email</span>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus />
               </label>
-              <label className="field">
-                <span className="field-lbl">Password</span>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </label>
+              <PasswordField label="Password" value={password} onChange={setPassword} />
               {mode === "signup" && (
-                <label className="field">
-                  <span className="field-lbl">Confirm password</span>
-                  <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
-                </label>
+                <PasswordField label="Confirm password" value={confirm} onChange={setConfirm} />
               )}
               {err && <p className={styles.err}>{err}</p>}
               <button type="submit" className="primary" disabled={loading}>
