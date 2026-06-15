@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe, tierForPriceId } from "@/lib/stripe";
 import { adminSetTier, adminLinkStripe, adminUidForCustomer, adminIsTierLocked } from "@/lib/userAdmin";
+import { adminMarkOrderPaid } from "@/lib/orderAdmin";
+import { notifyMembershipChange } from "@/lib/membership";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 import type { Tier } from "@/lib/types";
 
 // Must read the raw body for signature verification — Node runtime, no caching.
@@ -36,6 +39,21 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
+      case "checkout.session.completed": {
+        // One-off art purchase (mode: payment). Subscription checkouts are
+        // fulfilled via the subscription events below, so ignore those here.
+        const session = event.data.object as Stripe.Checkout.Session;
+        const orderId = session.metadata?.orderId;
+        if (session.mode === "payment" && session.payment_status === "paid" && orderId) {
+          const result = await adminMarkOrderPaid(orderId, session.id);
+          // Backup path: if this webhook (not the success redirect) made the
+          // pending→paid transition, it owns the confirmation email.
+          if (result?.justPaid) {
+            try { await sendOrderConfirmationEmail(result.order); } catch { /* mail is non-critical */ }
+          }
+        }
+        break;
+      }
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
@@ -46,7 +64,10 @@ export async function POST(req: NextRequest) {
         const sub = event.data.object as Stripe.Subscription;
         const uid = await uidFromSubscription(sub);
         // Respect the admin lock — a locked tier is never changed by Stripe.
-        if (uid && !(await adminIsTierLocked(uid))) await adminSetTier(uid, 0);
+        if (uid && !(await adminIsTierLocked(uid))) {
+          await adminSetTier(uid, 0);
+          await notifyMembershipChange(uid); // → cancellation email (once)
+        }
         break;
       }
       default:
@@ -89,4 +110,6 @@ async function applySubscription(sub: Stripe.Subscription): Promise<void> {
   const tier: Tier = active ? (tierForPriceId(priceId) ?? 0) : 0;
 
   await adminSetTier(uid, tier);
+  // Email the user about any not-yet-notified change (welcome/upgrade/downgrade).
+  await notifyMembershipChange(uid);
 }

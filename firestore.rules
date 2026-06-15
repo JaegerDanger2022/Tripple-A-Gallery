@@ -61,17 +61,16 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Orders — a buyer may read their own orders and create an order for
-    // themselves at checkout. Orders are immutable from the client once placed
-    // (no update/delete), so download entitlements can't be tampered with.
-    // The download gate reads orders server-side via the Admin SDK (bypasses
-    // these rules); admins may read all orders.
+    // Orders — a buyer may read their own orders; admins read all. Orders are
+    // created and updated ONLY server-side via the Admin SDK (Stripe checkout +
+    // fulfilment), which bypasses these rules. The client can never write an
+    // order, so an unpaid cart can't be forged into a "paid" order (which would
+    // otherwise unlock digital downloads). The download gate also reads orders
+    // server-side via the Admin SDK.
     match /orders/{orderId} {
       allow read: if isAdmin() ||
         (request.auth != null && resource.data.userId == request.auth.uid);
-      allow create: if request.auth != null &&
-        request.resource.data.userId == request.auth.uid;
-      allow update, delete: if false;
+      allow create, update, delete: if false;
     }
 
     // Deny everything else

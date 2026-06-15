@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Multi-factor authentication — Tripple A Gallery</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Geist:wght@300;400&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #ede9e2;
+      font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+      font-weight: 300;
+      color: #1a1a1a;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    .email-wrapper {
+      width: 100%;
+      padding: 48px 16px;
+      background-color: #ede9e2;
+    }
+
+    .email-card {
+      max-width: 560px;
+      margin: 0 auto;
+      background-color: #f6f4ef;
+      border: 1px solid rgba(26,26,26,0.10);
+    }
+
+    .header {
+      padding: 40px 48px 32px;
+      border-bottom: 1px solid rgba(26,26,26,0.10);
+      text-align: center;
+    }
+
+    .logo-mark {
+      display: inline-block;
+      width: 44px;
+      height: 44px;
+      background-color: #f5f0ea;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 52px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 36px;
+      color: #7a3b2e;
+      margin-bottom: 16px;
+    }
+
+    .brand-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #6b675e;
+    }
+
+    .body {
+      padding: 48px 48px 40px;
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #7a3b2e;
+      margin-bottom: 16px;
+    }
+
+    .heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 32px;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.2;
+      color: #1a1a1a;
+      margin-bottom: 24px;
+    }
+
+    .body-text {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.7;
+      color: #3d3a34;
+      margin-bottom: 16px;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #eef4ee;
+      border: 1px solid rgba(58,74,58,0.20);
+      padding: 10px 16px;
+      margin-bottom: 32px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #3a4a3a;
+      flex-shrink: 0;
+    }
+
+    .badge-text {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #3a4a3a;
+    }
+
+    /* Feature list */
+    .feature-list {
+      margin: 28px 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(26,26,26,0.08);
+    }
+
+    .feature-item:first-child {
+      border-top: 1px solid rgba(26,26,26,0.08);
+    }
+
+    .feature-icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feature-text {
+      font-size: 13px;
+      font-weight: 300;
+      line-height: 1.6;
+      color: #3d3a34;
+    }
+
+    .feature-text strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+
+    /* Detail table */
+    .detail-table {
+      width: 100%;
+      margin: 20px 0 28px;
+      border-collapse: collapse;
+      background-color: #f0ede6;
+      padding: 20px 24px;
+    }
+
+    .detail-row td {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 300;
+      color: #3d3a34;
+      border-bottom: 1px solid rgba(26,26,26,0.06);
+    }
+
+    .detail-row:last-child td {
+      border-bottom: none;
+    }
+
+    .detail-row td:first-child {
+      width: 120px;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: #6b675e;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: rgba(26,26,26,0.10);
+      margin: 36px 0;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: #7a3b2e;
+      color: #f6f4ef !important;
+      text-decoration: none;
+      font-family: 'Geist', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 14px 36px;
+    }
+
+    .secondary-link {
+      display: block;
+      margin-top: 14px;
+      font-size: 12px;
+      font-weight: 300;
+      color: #6b675e;
+      text-decoration: underline;
+    }
+
+    .footer {
+      padding: 28px 48px 36px;
+      border-top: 1px solid rgba(26,26,26,0.10);
+    }
+
+    .footer-text {
+      font-size: 11px;
+      font-weight: 300;
+      color: #6b675e;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .footer-text a {
+      color: #6b675e;
+      text-decoration: underline;
+    }
+
+    .footer-address {
+      margin-top: 12px;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: #9e9a92;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .header { padding: 32px 28px 24px; }
+      .body { padding: 36px 28px 32px; }
+      .footer { padding: 24px 28px 32px; }
+      .heading { font-size: 26px; }
+      .detail-row td { padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <table class="email-card" role="presentation" cellspacing="0" cellpadding="0" width="100%">
+
+      <!-- Header -->
+      <tr>
+        <td class="header">
+          <div class="logo-mark">A</div>
+          <div class="brand-name">Tripple A Gallery</div>
+        </td>
+      </tr>
+
+      <!-- Body -->
+      <tr>
+        <td class="body">
+          <p class="eyebrow">Account Security</p>
+          <h1 class="heading">Two-factor authentication enabled</h1>
+
+          <!-- Status badge -->
+          <div class="status-badge">
+            <div class="badge-dot"></div>
+            <span class="badge-text">MFA active on your account</span>
+          </div>
+
+          <p class="body-text">
+            Multi-factor authentication has been successfully enabled for <strong style="font-weight:400;">{{USER_EMAIL}}</strong>. Your account now has an additional layer of protection.
+          </p>
+
+          <!-- What this means -->
+          <ul class="feature-list">
+            <li class="feature-item">
+              <svg class="feature-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2L12.5 7.5L18 8.27L14 12.14L14.9 17.63L10 15L5.1 17.63L6 12.14L2 8.27L7.5 7.5L10 2Z" stroke="#7a3b2e" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="feature-text">
+                <strong>Stronger sign-in</strong>
+                Each sign-in now requires a one-time code in addition to your password.
+              </span>
+            </li>
+            <li class="feature-item">
+              <svg class="feature-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="9" width="12" height="9" rx="1.5" stroke="#7a3b2e" stroke-width="1.1"/>
+                <path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke="#7a3b2e" stroke-width="1.1" stroke-linecap="round"/>
+              </svg>
+              <span class="feature-text">
+                <strong>Protected even if your password leaks</strong>
+                No one can access your account with just a password alone.
+              </span>
+            </li>
+            <li class="feature-item">
+              <svg class="feature-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 3C10 3 4 5.5 4 10.5V14l6 3 6-3v-3.5C16 5.5 10 3 10 3Z" stroke="#7a3b2e" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="feature-text">
+                <strong>Purchase &amp; collection security</strong>
+                Orders and digital downloads require authenticated sessions.
+              </span>
+            </li>
+          </ul>
+
+          <!-- Enrolment details -->
+          <table role="presentation" cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+              <td style="background-color:#f0ede6;">
+                <table role="presentation" cellspacing="0" cellpadding="0" width="100%">
+                  <tr class="detail-row">
+                    <td>Method</td>
+                    <td>{{MFA_METHOD}}</td>
+                  </tr>
+                  <tr class="detail-row">
+                    <td>Enrolled on</td>
+                    <td>{{ENROLLED_DATE}}</td>
+                  </tr>
+                  <tr class="detail-row">
+                    <td>Device</td>
+                    <td>{{DEVICE_INFO}}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <div class="divider"></div>
+
+          <p class="body-text" style="margin-bottom: 20px;">
+            If you did not enable two-factor authentication, your account may have been accessed without your knowledge. Please secure your account immediately.
+          </p>
+
+          <a href="{{ACCOUNT_SECURITY_LINK}}" class="cta-button">Review account security</a>
+          <a href="mailto:info@trippleagallery.com" class="secondary-link">Contact support</a>
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td class="footer">
+          <p class="footer-text">
+            Security questions? <a href="mailto:info@trippleagallery.com">info@trippleagallery.com</a>
+          </p>
+          <p class="footer-address">
+            Tripple A Gallery &nbsp;·&nbsp; 167–169 Great Portland Street &nbsp;·&nbsp; London W1W 5PF
+          </p>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+</body>
+</html>

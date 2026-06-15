@@ -55,6 +55,8 @@
 }
 .tierLabel { display: block; font-family: var(--f-display); font-size: 20px; margin-top: 4px; }
 .upgradeMsg { font-size: 13px; color: var(--accent); margin-top: 6px; }
+.billingErr { font-size: 13px; color: var(--accent); margin-top: 6px; }
+.membershipActions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
 .body { padding: 48px var(--pad); max-width: 880px; }
 .sectionHd {

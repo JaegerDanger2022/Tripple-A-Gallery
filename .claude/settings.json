@@ -48,7 +48,17 @@
       "PowerShell(gcloud logging read 'resource.type=\"cloud_run_revision\" AND logName=\"projects/tripple-a-gallery/logs/run.googleapis.com%2Fstderr\"' --project tripple-a-gallery --limit 15 --freshness=20m --format=\"value\\(timestamp,textPayload\\)\" 2>&1)",
       "PowerShell(\"=== confirm requests last 20m \\(status + latency\\) ===\")",
       "PowerShell(\"`n=== app stderr errors last 20m ===\")",
-      "PowerShell(node \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\_diag-session.mjs\" \"cs_test_b1fsDlxU0lgROw3GPQXjpqRFM8VGDmE15A993As2W3fSP9GA7JPiOZrwyK\" 2>&1)"
+      "PowerShell(node \"c:\\\\Users\\\\mkmen\\\\Documents\\\\GitHub\\\\BUSINESS_REPOS\\\\Tripple-A-Gallery\\\\_diag-session.mjs\" \"cs_test_b1fsDlxU0lgROw3GPQXjpqRFM8VGDmE15A993As2W3fSP9GA7JPiOZrwyK\" 2>&1)",
+      "PowerShell(netsh interface ipv4 show excludedportrange protocol=tcp)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue)",
+      "Bash(node -e \"console.log\\(require\\('next/package.json'\\).version\\)\")",
+      "Bash(git stash *)",
+      "Bash(ls src/app/confirmation/)",
+      "Bash(ls firestore.rules storage.rules)",
+      "Bash(find . -maxdepth 2 -name \"*.rules\" -not -path \"./node_modules/*\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")",
+      "Bash(sed -E 's/=.*//' .env.local)",
+      "Bash(grep -vE '^\\\\s*#|^\\\\s*$')"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

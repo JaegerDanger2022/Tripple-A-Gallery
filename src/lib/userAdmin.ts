@@ -6,6 +6,30 @@ import type { Tier } from "./types";
 
 const usersDoc = (uid: string) => adminDb.collection("users").doc(uid);
 
+/**
+ * Detect a membership change that hasn't been emailed yet. Compares the user's
+ * current `tier` to `notifiedTier`; if they differ, advances `notifiedTier` to
+ * match (in a transaction) and returns the transition + email so the caller can
+ * send exactly one membership email. Returns null when already up to date — so
+ * it's safe to call from every tier-changing path (confirm redirect + webhook)
+ * without ever double-sending.
+ */
+export async function adminNotifyTierChange(
+  uid: string
+): Promise<{ from: Tier; to: Tier; email: string } | null> {
+  const ref = usersDoc(uid);
+  return adminDb.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return null;
+    const data = snap.data() ?? {};
+    const to = (data.tier ?? 0) as Tier;
+    const from = (data.notifiedTier ?? 0) as Tier;
+    if (from === to) return null;
+    tx.update(ref, { notifiedTier: to });
+    return { from, to, email: (data.email ?? "") as string };
+  });
+}
+
 /** Set a user's access tier (called from Stripe fulfilment / webhook). */
 export async function adminSetTier(uid: string, tier: Tier): Promise<void> {
   await usersDoc(uid).set(
@@ -30,6 +54,12 @@ export async function adminLinkStripe(
   data: { stripeCustomerId?: string; stripeSubscriptionId?: string }
 ): Promise<void> {
   await usersDoc(uid).set({ ...data, updatedAt: Date.now() }, { merge: true });
+}
+
+/** The Stripe customer id linked to a user, or null if they've never subscribed. */
+export async function adminStripeCustomerId(uid: string): Promise<string | null> {
+  const snap = await usersDoc(uid).get();
+  return snap.exists ? (snap.data()?.stripeCustomerId ?? null) : null;
 }
 
 /** Find the uid whose profile is linked to a given Stripe customer id. */

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { stripe, tierForPriceId } from "@/lib/stripe";
 import { adminSetTier, adminLinkStripe, adminIsTierLocked } from "@/lib/userAdmin";
+import { notifyMembershipChange } from "@/lib/membership";
 import type { Tier } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -76,5 +77,7 @@ export async function POST(req: NextRequest) {
   }
 
   await adminSetTier(uid, tier);
+  // Send the membership email now (webhook is the backup); deduped server-side.
+  await notifyMembershipChange(uid);
   return NextResponse.json({ ok: true, tier });
 }

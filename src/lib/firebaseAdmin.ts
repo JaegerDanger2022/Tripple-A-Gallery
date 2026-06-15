@@ -29,3 +29,13 @@ const app = buildApp();
 export const adminAuth = getAuth(app);
 export const adminDb = getFirestore(app);
 export const adminStorage = getStorage(app);
+
+// Skip `undefined` fields on writes instead of throwing. Without this, a single
+// optional field left blank (e.g. an order's address line 2) fails the whole
+// set(). Guarded because settings() may only be applied once, before first use
+// (it throws on dev hot-reload where the Firestore instance persists).
+try {
+  adminDb.settings({ ignoreUndefinedProperties: true });
+} catch {
+  // Already configured / in use — keep the existing settings.
+}

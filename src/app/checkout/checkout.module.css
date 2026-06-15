@@ -18,6 +18,24 @@
 
 .empty { padding: 120px 20px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .empty h1 { font-family: var(--f-display); font-weight: 400; font-size: 40px; margin: 0; }
+
+/* Payment step — Stripe handoff */
+.payBox {
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.payBoxHd {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink);
+}
+.payErr {
+  font-size: 13px; color: var(--accent); margin: 0;
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--line));
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  padding: 10px 14px; border-radius: 4px;
+}
 .empty button { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
 
 .side {

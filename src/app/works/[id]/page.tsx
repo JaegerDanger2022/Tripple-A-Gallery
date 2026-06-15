@@ -3,18 +3,15 @@
 import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
-import { ARTIST, getVariants } from "@/lib/data";
+import { ARTIST } from "@/lib/data";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { isUnlocked } from "@/lib/tier";
-import type { Variant } from "@/lib/types";
+import { buildVariants, frameOptions } from "@/lib/pricing";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import ArtworkCard from "@/components/ArtworkCard/ArtworkCard";
 import type { Artwork } from "@/lib/types";
 import styles from "./detail.module.css";
-
-// Price (£) for the digital download option — flat for any work.
-const DIGITAL_PRICE = 15;
 
 export default function DetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: rawId } = use(params);
@@ -83,44 +80,13 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   // Pricing / cart is only shown after "Get a copy" is clicked
   const revealed = revealedArtworks.has(a.id);
 
-  // Build variant list: from Firestore formats if available, else static fallback
-  const baseVariants: Variant[] = formats.length > 0
-    ? formats
-        .filter((f) => f.enabled)
-        .map((f) => {
-          // fixed with price 0 = use the artwork's own price (e.g. Original)
-          const isOriginal = f.priceMode === "fixed" && f.fixedPrice <= 0;
-          return {
-            id: f.id,
-            label: f.name,
-            sub: f.description,
-            price: f.priceMode === "fixed"
-              ? (f.fixedPrice > 0 ? f.fixedPrice : a.price || 0)
-              : Math.round((a.price || 200) * f.percentBase + f.percentAdd),
-            isOriginal,
-          };
-        })
-    : getVariants(a);
-
-  // Digital download — only offered when the admin has uploaded a hi-res file.
-  // The file itself is private; buyers receive it via a gated signed URL.
-  const hasDigital = Boolean(a.hiResPath);
-  const digitalVariant: Variant = {
-    id: "digital",
-    label: "Digital download",
-    sub: "High-res image · instant download · personal use",
-    price: DIGITAL_PRICE,
-    isDigital: true,
-  };
-  const variants: Variant[] = hasDigital
-    ? [digitalVariant, ...baseVariants]
-    : baseVariants;
-
+  // Build the variant + frame lists from the shared pricing module, so what's
+  // shown here matches exactly what the checkout API recomputes and charges.
+  // (Digital download is included when the work has a private hi-res file.)
+  const variants = buildVariants(a, formats);
   const v = variants.find((x) => x.id === variantId) ?? variants[0];
 
-  // Unframed is always shown; paid frames only appear when admin has added them
-  const unframed = { id: "none", name: "Unframed", color: "#e8e4dc", price: 0, order: -1 };
-  const frameOpts = frames.length > 0 ? frames : [unframed];
+  const frameOpts = frameOptions(frames);
   const selectedFrame = frameOpts.find((f) => f.id === frameId) ?? frameOpts[0];
   // Digital downloads have no physical frame; price is just the file.
   const total = v.isDigital ? v.price : v.price + (selectedFrame?.price ?? 0);

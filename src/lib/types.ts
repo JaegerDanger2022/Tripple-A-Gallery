@@ -64,6 +64,15 @@ export interface OrderItem {
   isDigital?: boolean;
 }
 
+export interface ShippingAddress {
+  name: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  postal: string;
+  country: string;
+}
+
 export interface Order {
   id: string;              // human-facing order id, e.g. "AI-7F3K2A"
   userId: string;          // Firebase auth uid
@@ -72,8 +81,13 @@ export interface Order {
   subtotal: number;
   shipping: number;
   total: number;
-  status: "paid" | "shipped" | "delivered";
+  // "pending" = checkout started, awaiting Stripe payment. Promoted to "paid"
+  // by Stripe fulfilment (order-confirm redirect / webhook). Only paid+ orders
+  // grant digital downloads. "cancelled" marks an abandoned/expired checkout.
+  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
   createdAt: number;       // epoch ms (mirrors serverTimestamp for client sorting)
+  shipTo?: ShippingAddress;      // destination captured at checkout (physical orders)
+  stripeSessionId?: string;      // the Checkout Session that paid for this order
 }
 
 // ── Tiered access ──────────────────────────────────────────────────────────
@@ -94,6 +108,8 @@ export interface UserProfile {
   stripeSubscriptionId?: string; // current active subscription, for webhook mapping
   adminTierLock?: boolean;       // when true, Stripe fulfilment NEVER changes tier —
                                  // the admin-set tier always wins until unlocked.
+  notifiedTier?: Tier;           // last tier the user was emailed about — used to
+                                 // send membership change emails exactly once.
 }
 
 export interface FormatOption {

@@ -7,14 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import styles from "./checkout.module.css";
 
-function formatCard(v: string) {
-  return v.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})(?=\d)/g, "$1 ");
-}
-function formatExp(v: string) {
-  const d = v.replace(/\D/g, "").slice(0, 4);
-  return d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d;
-}
-
 interface FieldProps {
   label: string;
   value: string;
@@ -33,14 +25,36 @@ function Field({ label, value, onChange, placeholder, error, type = "text" }: Fi
   );
 }
 
+// Common shipping destinations first, then the rest alphabetically.
+const COUNTRIES = [
+  "United Kingdom", "United States", "Canada", "Ireland", "France", "Germany",
+  "Spain", "Italy", "Netherlands", "Belgium", "Switzerland", "Austria",
+  "Sweden", "Norway", "Denmark", "Finland", "Portugal", "Poland",
+  "Australia", "New Zealand", "Japan", "Singapore", "Hong Kong",
+  "United Arab Emirates", "Ghana", "Nigeria", "South Africa", "Kenya",
+];
+
+function SelectField({ label, value, onChange, options, error }: {
+  label: string; value: string; onChange: (v: string) => void; options: string[]; error?: string;
+}) {
+  return (
+    <label className={`field ${error ? "err" : ""}`}>
+      <span className="field-lbl">{label}{error && <span className="field-err"> · {error}</span>}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </label>
+  );
+}
+
 export default function CheckoutPage() {
-  const { cart, clearCart, artworks } = useApp();
-  const { user } = useAuth();
+  const { cart, artworks } = useApp();
+  const { user, openAuthModal } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     email: "", name: "", address1: "", address2: "", city: "",
-    postal: "", country: "United Kingdom", card: "", exp: "", cvc: "",
+    postal: "", country: "United Kingdom",
   });
 
   useEffect(() => {
@@ -68,10 +82,6 @@ export default function CheckoutPage() {
       if (!form.address1) e.address1 = "Required";
       if (!form.city) e.city = "Required";
       if (!form.postal) e.postal = "Required";
-    } else if (stepN === 3) {
-      if (form.card.replace(/\s/g, "").length < 14) e.card = "Card number looks short";
-      if (!/^\d{2}\/\d{2}$/.test(form.exp)) e.exp = "MM/YY";
-      if (form.cvc.length < 3) e.cvc = "3 digits";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -80,44 +90,47 @@ export default function CheckoutPage() {
   function next() { if (validate(step)) setStep(step + 1); }
 
   const [placing, setPlacing] = useState(false);
+  const [payErr, setPayErr] = useState("");
 
-  async function placeOrder() {
-    if (!validate(3)) return;
+  // Hand off to Stripe Checkout. The cart is recomputed + charged server-side;
+  // we only send item references (artwork/variant/frame), never prices. The
+  // order is recorded server-side and marked paid on return / via webhook.
+  async function payNow() {
+    setPayErr("");
+    if (!user) { openAuthModal("signin"); return; }
+
     setPlacing(true);
-    const sub = cart.reduce((s, it) => s + it.price * it.qty, 0);
-    const ship = shipping;
-    const orderId = "AI-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-
-    // Persist the order so the buyer can see it in their account.
-    // Only stored when signed in (account history is per-user).
-    if (user) {
-      try {
-        const { createOrder } = await import("@/lib/firestore");
-        await createOrder({
-          id: orderId,
-          userId: user.uid,
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/stripe/cart-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
           email: form.email || user.email || "",
+          shipTo: hasPhysical ? {
+            name: form.name, address1: form.address1, address2: form.address2,
+            city: form.city, postal: form.postal, country: form.country,
+          } : undefined,
           items: cart.map((it) => ({
             artworkId: it.artworkId,
-            lotNumber: it.lotNumber ?? "",
-            variantLabel: it.variantLabel,
-            frameLabel: it.frameLabel,
-            price: it.price,
+            variantId: it.variantId,
+            frameId: it.frameId,
             qty: it.qty,
-            ...(it.isDigital ? { isDigital: true } : {}),
           })),
-          subtotal: sub,
-          shipping: ship,
-          total: sub + ship,
-          status: "paid",
-        });
-      } catch {
-        // Don't block the buyer if persistence fails — receipt still goes out.
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body.url) {
+        // Full-page redirect to Stripe's hosted checkout.
+        window.location.href = body.url;
+        return;
       }
+      setPayErr(body.error || "Could not start checkout. Please try again.");
+    } catch {
+      setPayErr("Could not reach the payment service. Please try again.");
+    } finally {
+      setPlacing(false);
     }
-
-    clearCart();
-    router.push(`/confirmation?orderId=${orderId}&total=${sub + ship}`);
   }
 
   if (cart.length === 0) {
@@ -164,7 +177,7 @@ export default function CheckoutPage() {
                 <Field label="City" value={form.city} onChange={(v) => set("city", v)} error={errors.city} />
                 <Field label="Postal code" value={form.postal} onChange={(v) => set("postal", v)} error={errors.postal} />
               </div>
-              <Field label="Country" value={form.country} onChange={(v) => set("country", v)} />
+              <SelectField label="Country" value={form.country} onChange={(v) => set("country", v)} options={COUNTRIES} />
               <div className="form-actions">
                 <button className="ghost" onClick={() => setStep(1)}>← Back</button>
                 <button className="primary" onClick={next}>Continue to payment →</button>
@@ -174,16 +187,25 @@ export default function CheckoutPage() {
 
           {step === 3 && (
             <div className="form">
-              <Field label="Card number" value={form.card} onChange={(v) => set("card", formatCard(v))} placeholder="4242 4242 4242 4242" error={errors.card} />
-              <div className="form-row">
-                <Field label="Expiry" value={form.exp} onChange={(v) => set("exp", formatExp(v))} placeholder="MM/YY" error={errors.exp} />
-                <Field label="CVC" value={form.cvc} onChange={(v) => set("cvc", v.replace(/\D/g, "").slice(0, 4))} placeholder="123" error={errors.cvc} />
+              <div className={styles.payBox}>
+                <div className={styles.payBoxHd}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <span>Secure payment via Stripe</span>
+                </div>
+                <p className="form-note">
+                  You&apos;ll be taken to Stripe&apos;s secure checkout to pay by card, then brought straight back here. We never see or store your card details.
+                </p>
               </div>
-              <p className="form-note">Payment processed securely. Card details aren't stored on our end.</p>
+              {!user && (
+                <p className="form-note">Sign in to complete your purchase — your order and any downloads are saved to your account.</p>
+              )}
+              {payErr && <p className={styles.payErr}>{payErr}</p>}
               <div className="form-actions">
                 <button className="ghost" onClick={() => setStep(2)}>← Back</button>
-                <button className="primary" onClick={placeOrder} disabled={placing}>
-                  {placing ? "Placing order…" : `Place order · £${total.toLocaleString()}`}
+                <button className="primary" onClick={payNow} disabled={placing}>
+                  {placing ? "Redirecting…" : user ? `Pay £${total.toLocaleString()} →` : "Sign in to pay →"}
                 </button>
               </div>
             </div>

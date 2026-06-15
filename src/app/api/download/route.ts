@@ -40,6 +40,9 @@ export async function GET(req: NextRequest) {
 
   const owns = snap.docs.some((d) => {
     const order = d.data() as Order;
+    // Only a paid (or later) order grants the download — never a pending or
+    // cancelled checkout that was started but not paid.
+    if (order.status === "pending" || order.status === "cancelled") return false;
     return (order.items ?? []).some(
       (it) => it.isDigital && it.artworkId === artworkId
     );

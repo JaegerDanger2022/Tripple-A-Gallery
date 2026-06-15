@@ -169,14 +169,9 @@ export async function reorderFormats(ordered: { id: string; order: number }[]): 
 
 const ordersCol = () => collection(db, "orders");
 
-export async function createOrder(order: Omit<Order, "createdAt"> & { createdAt?: number }): Promise<void> {
-  // Use the human-facing order id as the document id so it's easy to look up.
-  await setDoc(doc(db, "orders", order.id), {
-    ...order,
-    createdAt: order.createdAt ?? Date.now(),
-    serverCreatedAt: serverTimestamp(),
-  });
-}
+// Orders are created server-side only (Stripe checkout via the Admin SDK) — see
+// src/lib/orderAdmin.ts. The client never writes orders (Firestore rules forbid
+// it), so an unpaid cart can't be forged into a paid order.
 
 export async function getOrdersForUser(userId: string): Promise<Order[]> {
   // Avoids a composite index: filter by user, sort client-side by createdAt.

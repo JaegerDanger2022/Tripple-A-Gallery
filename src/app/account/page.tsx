@@ -27,6 +27,9 @@ function AccountInner() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [downloadErr, setDownloadErr] = useState("");
+  // Billing-portal handoff state.
+  const [openingPortal, setOpeningPortal] = useState(false);
+  const [billingErr, setBillingErr] = useState("");
   // Upgrade fulfilment status, driven by the ?upgrade=success&session_id=… redirect.
   const [upgradeMsg, setUpgradeMsg] = useState("");
   // Guard: confirm each session exactly once. Without this the effect re-fires
@@ -102,6 +105,32 @@ function AccountInner() {
     }
   }
 
+  // Open Stripe's hosted Billing Portal, where the user can cancel, switch plan,
+  // or update payment. The resulting change comes back as a subscription webhook
+  // that re-syncs the tier — we only hand the browser off to Stripe here.
+  async function handleManageBilling() {
+    if (!user) return;
+    setBillingErr("");
+    setOpeningPortal(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok && body.url) {
+        window.location.href = body.url;
+        return;
+      }
+      setBillingErr(body.error || "Could not open the billing portal.");
+    } catch {
+      setBillingErr("Could not open the billing portal. Please try again.");
+    } finally {
+      setOpeningPortal(false);
+    }
+  }
+
   useEffect(() => {
     if (authLoading) return;
     if (!user) { setLoading(false); return; }
@@ -174,12 +203,22 @@ function AccountInner() {
           <div className="kicker">Membership</div>
           <span className={styles.tierLabel}>{TIER_LABELS[profile?.tier ?? 0]}</span>
           {upgradeMsg && <p className={styles.upgradeMsg}>{upgradeMsg}</p>}
+          {billingErr && <p className={styles.billingErr}>{billingErr}</p>}
         </div>
-        {(profile?.tier ?? 0) < 2 && (
-          <button className="primary" onClick={() => router.push("/pricing")}>
-            {(profile?.tier ?? 0) === 0 ? "Upgrade access →" : "See higher tier →"}
-          </button>
-        )}
+        <div className={styles.membershipActions}>
+          {(profile?.tier ?? 0) < 2 && (
+            <button className="primary" onClick={() => router.push("/pricing")}>
+              {(profile?.tier ?? 0) === 0 ? "Upgrade access →" : "See higher tier →"}
+            </button>
+          )}
+          {/* Only when there's a Stripe subscription to manage (paid via Stripe,
+              not an admin-granted tier, which has no customer id). */}
+          {profile?.stripeCustomerId && (
+            <button className="ghost" onClick={handleManageBilling} disabled={openingPortal}>
+              {openingPortal ? "Opening…" : "Manage billing"}
+            </button>
+          )}
+        </div>
       </section>
 
       <section className={styles.body}>

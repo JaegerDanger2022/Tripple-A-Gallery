@@ -65,6 +65,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [tweaks, setTweaks] = useState<TweakValues>(DEFAULTS);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  // Cart is hydrated from localStorage after mount (kept null-safe for SSR) so
+  // it survives the full-page redirect out to Stripe Checkout and back.
+  const [cartHydrated, setCartHydrated] = useState(false);
   const [revealedArtworks, setRevealedArtworks] = useState<Set<string>>(new Set());
   const [artworks, setArtworks] = useState<Artwork[]>(STATIC_ARTWORKS);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -89,6 +92,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  // Hydrate the cart once on mount.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("aaa_cart");
+      if (raw) setCart(JSON.parse(raw) as CartItem[]);
+    } catch {
+      // Corrupt/unavailable storage — start with an empty cart.
+    }
+    setCartHydrated(true);
+  }, []);
+
+  // Persist the cart on every change (but not before the initial hydrate, so we
+  // don't clobber a stored cart with the empty initial state).
+  useEffect(() => {
+    if (!cartHydrated) return;
+    try { localStorage.setItem("aaa_cart", JSON.stringify(cart)); } catch { /* ignore */ }
+  }, [cart, cartHydrated]);
 
   const setTweak = useCallback(<K extends keyof TweakValues>(key: K, value: TweakValues[K]) => {
     setTweaks((prev) => ({ ...prev, [key]: value }));
