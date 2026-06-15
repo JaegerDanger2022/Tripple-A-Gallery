@@ -19,16 +19,19 @@ export async function POST(req: NextRequest) {
   let uid: string;
   let email: string | undefined;
   let name: string | undefined;
+  let verified = false;
   try {
     const decoded = await adminAuth.verifyIdToken(token);
     uid = decoded.uid;
     email = decoded.email ?? undefined;
     name = decoded.name ?? undefined;
+    verified = decoded.email_verified === true;
   } catch {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  if (!email) return NextResponse.json({ ok: true, sent: false });
+  // Only ever welcome a verified address — never an unverified/spam signup.
+  if (!email || !verified) return NextResponse.json({ ok: true, sent: false });
 
   const claimed = await adminClaimWelcomeEmail(uid);
   if (claimed) {

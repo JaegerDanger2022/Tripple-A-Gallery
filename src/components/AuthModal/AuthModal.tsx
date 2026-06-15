@@ -72,11 +72,15 @@ export default function AuthModal() {
     setLoading(true);
     try {
       if (mode === "signin") {
-        await signIn(email, password);
-        closeAuthModal();
+        const { needsVerification } = await signIn(email, password);
+        if (needsVerification) {
+          setMsg(`Please verify your email to sign in — we've sent a new link to ${email}.`);
+        } else {
+          closeAuthModal();
+        }
       } else if (mode === "signup") {
         await signUp(email, password);
-        closeAuthModal();
+        setMsg(`Account created. Check ${email} for a verification link, then sign in.`);
       } else {
         await resetPassword(email);
         setMsg("Password reset email sent. Check your inbox.");

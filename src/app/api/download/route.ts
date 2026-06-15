@@ -28,6 +28,9 @@ export async function GET(req: NextRequest) {
   try {
     const decoded = await adminAuth.verifyIdToken(token);
     uid = decoded.uid;
+    if (!decoded.email_verified) {
+      return NextResponse.json({ error: "Verify your email to download." }, { status: 403 });
+    }
   } catch {
     return unauthorized("Your session has expired. Sign in again.");
   }

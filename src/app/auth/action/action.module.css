@@ -1,0 +1,72 @@
+.wrap {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px;
+}
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 40px 40px 36px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 4px;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 32px;
+  line-height: 44px;
+  color: var(--accent);
+}
+
+.heading {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.2;
+  margin: 4px 0 4px;
+}
+
+.body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
+
+.muted { font-size: 14px; color: var(--muted); margin: 12px 0; }
+
+.err { font-size: 13px; color: var(--accent); margin: 0; }
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* The form inherits the global .form / .field styles; password reveal toggle: */
+.form { text-align: left; margin-top: 8px; }
+.pwWrap { position: relative; display: flex; }
+.pwWrap input { flex: 1; min-width: 0; }
+.pwToggle {
+  position: absolute; right: 4px; top: 0; bottom: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; color: var(--muted);
+  transition: color 0.15s;
+}
+.pwToggle:hover { color: var(--ink); }

@@ -1,7 +1,7 @@
 // Transactional email — sent directly via Resend. Server-only.
 //
 // Branding mirrors the Firebase Auth templates in src/emails/*.html (Cormorant
-// Garamond display, Geist body, #7a3b2e accent, Tripple A Gallery shell).
+// Garamond display, Geist body, #7a3b2e accent, Triple A Gallery shell).
 import { Resend } from "resend";
 import { TIER_LABELS } from "./tier";
 import type { Order, OrderItem, Tier } from "./types";
@@ -10,8 +10,8 @@ import type { Order, OrderItem, Tier } from "./types";
 // (tripleagallery.com, single-p). Order receipts come from orders@; membership
 // notifications from no-reply@ (automated, not monitored for replies); info@ is
 // the address customers contact us on (shown in every footer).
-const FROM_ORDERS = process.env.MAIL_FROM_ORDERS ?? "Tripple A Gallery <orders@tripleagallery.com>";
-const FROM_MEMBERSHIP = process.env.MAIL_FROM_MEMBERSHIP ?? "Tripple A Gallery <no-reply@tripleagallery.com>";
+const FROM_ORDERS = process.env.MAIL_FROM_ORDERS ?? "Triple A Gallery <orders@tripleagallery.com>";
+const FROM_MEMBERSHIP = process.env.MAIL_FROM_MEMBERSHIP ?? "Triple A Gallery <no-reply@tripleagallery.com>";
 const CONTACT_EMAIL = process.env.MAIL_CONTACT ?? "info@tripleagallery.com";
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")) || "https://tripleagallery.com";
 
@@ -77,7 +77,7 @@ function layout({ eyebrow, heading, bodyHtml, ctaLabel, ctaHref }: LayoutInput):
   return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${esc(heading)} — Tripple A Gallery</title>
+<title>${esc(heading)} — Triple A Gallery</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Geist:wght@300;400&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -112,7 +112,7 @@ function layout({ eyebrow, heading, bodyHtml, ctaLabel, ctaHref }: LayoutInput):
 </style></head>
 <body><div class="email-wrapper">
   <table class="email-card" role="presentation" cellspacing="0" cellpadding="0" width="100%">
-    <tr><td class="header"><div class="logo-mark">A</div><div class="brand-name">Tripple A Gallery</div></td></tr>
+    <tr><td class="header"><div class="logo-mark">A</div><div class="brand-name">Triple A Gallery</div></td></tr>
     <tr><td class="body">
       <p class="eyebrow">${esc(eyebrow)}</p>
       <h1 class="heading">${esc(heading)}</h1>
@@ -121,7 +121,7 @@ function layout({ eyebrow, heading, bodyHtml, ctaLabel, ctaHref }: LayoutInput):
     </td></tr>
     <tr><td class="footer">
       <p class="footer-text">Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
-      <p class="footer-address">Tripple A Gallery &nbsp;·&nbsp; 167–169 Great Portland Street &nbsp;·&nbsp; London W1W 5PF</p>
+      <p class="footer-address">Triple A Gallery &nbsp;·&nbsp; 167–169 Great Portland Street &nbsp;·&nbsp; London W1W 5PF</p>
     </td></tr>
   </table>
 </div></body></html>`;
@@ -182,7 +182,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<void> {
   });
 
   const textLines = [
-    `Tripple A Gallery — order confirmed`,
+    `Triple A Gallery — order confirmed`,
     ``,
     `Order ${order.id} · ${date}`,
     ...order.items.map((it) => `  • Lot ${it.lotNumber || "—"} — ${it.variantLabel}${it.qty > 1 ? ` ×${it.qty}` : ""} — ${money(it.price * it.qty)}`),
@@ -197,7 +197,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<void> {
     `View your orders: ${SITE_URL}/account`,
   ].filter(Boolean);
 
-  await sendMail({ to: order.email, from: FROM_ORDERS, replyTo: CONTACT_EMAIL, subject: `Your Tripple A Gallery order ${order.id}`, html, text: textLines.join("\n") });
+  await sendMail({ to: order.email, from: FROM_ORDERS, replyTo: CONTACT_EMAIL, subject: `Your Triple A Gallery order ${order.id}`, html, text: textLines.join("\n") });
 }
 
 // ── Subscription / membership changes ────────────────────────────────────────
@@ -243,7 +243,7 @@ export async function sendTierChangeEmail(email: string, from: Tier, to: Tier): 
   });
 
   const text = [
-    `Tripple A Gallery — ${c.heading}`,
+    `Triple A Gallery — ${c.heading}`,
     ``,
     c.intro,
     ``,
@@ -253,10 +253,10 @@ export async function sendTierChangeEmail(email: string, from: Tier, to: Tier): 
   ].join("\n");
 
   const subjectByKind: Record<TierChangeKind, string> = {
-    welcome: "Your Tripple A Gallery membership is active",
-    upgrade: "Your Tripple A Gallery membership has been upgraded",
-    downgrade: "Your Tripple A Gallery membership has been updated",
-    cancelled: "Your Tripple A Gallery membership has been cancelled",
+    welcome: "Your Triple A Gallery membership is active",
+    upgrade: "Your Triple A Gallery membership has been upgraded",
+    downgrade: "Your Triple A Gallery membership has been updated",
+    cancelled: "Your Triple A Gallery membership has been cancelled",
   };
 
   await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: subjectByKind[kind], html, text });
@@ -270,7 +270,7 @@ export async function sendWelcomeEmail(email: string, name?: string): Promise<vo
   const heading = first ? `Welcome, ${first}` : "Welcome to the gallery";
 
   const bodyHtml = `
-    <p class="body-text">Thank you for creating an account with Tripple A Gallery — home to the original works, collages and mixed-media pieces of Ama Antwiwaa Amponsah.</p>
+    <p class="body-text">Thank you for creating an account with Triple A Gallery — home to the original works, collages and mixed-media pieces of Ama Antwiwaa Amponsah.</p>
     <div class="panel"><p class="panel-label">Your access</p><p class="panel-text">${esc(TIER_LABELS[0])}</p></div>
     <p class="body-text">Your account is ready. Browse your collection, return to works you love, and unlock the full catalogue anytime by upgrading your membership.</p>`;
 
@@ -283,7 +283,7 @@ export async function sendWelcomeEmail(email: string, name?: string): Promise<vo
   });
 
   const text = [
-    `Welcome to Tripple A Gallery`,
+    `Welcome to Triple A Gallery`,
     ``,
     `Thank you for creating an account. Your access: ${TIER_LABELS[0]}.`,
     `Upgrade anytime to unlock the full catalogue.`,
@@ -291,5 +291,5 @@ export async function sendWelcomeEmail(email: string, name?: string): Promise<vo
     `Explore the collection: ${SITE_URL}/`,
   ].join("\n");
 
-  await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: "Welcome to Tripple A Gallery", html, text });
+  await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: "Welcome to Triple A Gallery", html, text });
 }

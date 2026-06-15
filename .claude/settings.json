@@ -66,7 +66,9 @@
       "Bash(grep -rn \"trippleagallery\\\\.com\" src/)",
       "Bash(git status *)",
       "Bash(git ls-files *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(sed -i 's/Tripple A Gallery/Triple A Gallery/g' src/lib/email.ts src/app/auth/action/page.tsx src/emails/email-change.html src/emails/email-verification.html src/emails/mfa-enrollment.html src/emails/password-reset.html)",
+      "Bash(grep -rn \"Tripple A Gallery\" src/)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

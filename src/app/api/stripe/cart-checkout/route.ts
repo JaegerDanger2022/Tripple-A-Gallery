@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
     const decoded = await adminAuth.verifyIdToken(token);
     uid = decoded.uid;
     email = decoded.email ?? undefined;
+    // Require a verified email — defence-in-depth behind the client gate.
+    if (!decoded.email_verified) return bad("Please verify your email before checking out.", 403);
   } catch {
     return bad("Your session has expired. Sign in again.", 401);
   }

@@ -26,8 +26,11 @@ interface AuthContextValue {
   authModalMode: "signin" | "signup";
   openAuthModal: (mode?: "signin" | "signup") => void;
   closeAuthModal: () => void;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  // Both resolve with whether the account still needs email verification. When
+  // true the session has been ended (verification is required to use the app),
+  // so the caller should prompt the user to verify rather than grant access.
+  signIn: (email: string, password: string) => Promise<{ needsVerification: boolean }>;
+  signUp: (email: string, password: string) => Promise<{ needsVerification: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -86,16 +89,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function closeAuthModal() { setAuthModalOpen(false); }
 
-  async function signIn(email: string, password: string) {
-    await signInWithEmailAndPassword(auth, email, password);
-  }
-
-  async function signUp(email: string, password: string) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    // Both are best-effort and non-blocking — signup shouldn't wait on, or fail
-    // because of, an email. Firebase sends verification (Console template); our
-    // server sends the branded welcome (deduped) via Resend.
-    sendEmailVerification(cred.user).catch(() => {});
+  async function signIn(email: string, password: string): Promise<{ needsVerification: boolean }> {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    // Email verification is REQUIRED. An unverified account can't hold a session:
+    // resend the link and sign back out so they must verify first.
+    if (!cred.user.emailVerified) {
+      await sendEmailVerification(cred.user).catch(() => {});
+      await firebaseSignOut(auth);
+      return { needsVerification: true };
+    }
+    // First verified sign-in: fire the branded welcome (deduped server-side, so
+    // it sends exactly once — and never to an unverified/spam address).
     cred.user
       .getIdToken()
       .then((token) =>
@@ -105,6 +109,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
       )
       .catch(() => {});
+    return { needsVerification: false };
+  }
+
+  async function signUp(email: string, password: string): Promise<{ needsVerification: boolean }> {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    // Send the verification link, then end the session — the account must be
+    // verified before it can be used (lets us purge unverified/spam signups).
+    // The welcome email is deferred to the first verified sign-in.
+    await sendEmailVerification(cred.user).catch(() => {});
+    await firebaseSignOut(auth);
+    return { needsVerification: true };
   }
 
   async function signOut() {
