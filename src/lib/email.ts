@@ -262,6 +262,56 @@ export async function sendTierChangeEmail(email: string, from: Tier, to: Tier): 
   await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: subjectByKind[kind], html, text });
 }
 
+// ── Auth: verification & password reset ──────────────────────────────────────
+// Links are generated server-side (Admin SDK) and rebuilt onto our own domain
+// (/auth/action), so these branded emails fully replace Firebase's plain ones.
+
+export async function sendVerificationEmail(email: string, link: string): Promise<void> {
+  if (!email || !link) return;
+  const bodyHtml = `
+    <p class="body-text">Thanks for creating an account. Please confirm this is your email address to activate it — you'll then be able to sign in.</p>
+    <p class="body-text" style="font-size:13px;color:#6b675e;">This link is single-use and expires shortly. If you didn't create an account, you can safely ignore this email.</p>`;
+  const html = layout({
+    eyebrow: "Verify your email",
+    heading: "Confirm your email address",
+    bodyHtml,
+    ctaLabel: "Verify email",
+    ctaHref: link,
+  });
+  const text = [
+    `Triple A Gallery — confirm your email`,
+    ``,
+    `Please confirm your email address to activate your account:`,
+    link,
+    ``,
+    `This link is single-use and expires shortly. If you didn't create an account, ignore this email.`,
+  ].join("\n");
+  await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: "Confirm your email — Triple A Gallery", html, text });
+}
+
+export async function sendResetEmail(email: string, link: string): Promise<void> {
+  if (!email || !link) return;
+  const bodyHtml = `
+    <p class="body-text">We received a request to reset the password for your account. Choose a new password using the button below.</p>
+    <p class="body-text" style="font-size:13px;color:#6b675e;">This link is single-use and expires shortly. If you didn't request this, you can safely ignore this email — your password won't change.</p>`;
+  const html = layout({
+    eyebrow: "Password reset",
+    heading: "Reset your password",
+    bodyHtml,
+    ctaLabel: "Reset password",
+    ctaHref: link,
+  });
+  const text = [
+    `Triple A Gallery — reset your password`,
+    ``,
+    `Choose a new password:`,
+    link,
+    ``,
+    `This link is single-use and expires shortly. If you didn't request this, ignore this email.`,
+  ].join("\n");
+  await sendMail({ to: email, from: FROM_MEMBERSHIP, subject: "Reset your password — Triple A Gallery", html, text });
+}
+
 // ── Account welcome (free signup) ────────────────────────────────────────────
 
 export async function sendWelcomeEmail(email: string, name?: string): Promise<void> {

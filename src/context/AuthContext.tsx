@@ -5,9 +5,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   signOut as firebaseSignOut,
-  sendPasswordResetEmail,
   User,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -55,7 +53,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfileLoading(false);
         return;
       }
-      // Load (or create on first sign-in) the tiered-access profile.
+      // Don't provision a Firestore profile for an unverified account — that
+      // covers the brief window right after signup (before sign-out). The
+      // profile is created on the first VERIFIED sign-in, so unverified/spam
+      // signups never write any app data.
+      if (!u.emailVerified) {
+        setProfile(null);
+        setProfileLoading(false);
+        return;
+      }
+      // Load (or create on first verified sign-in) the tiered-access profile.
       setProfileLoading(true);
       try {
         const p = await ensureUserProfile(u.uid, u.email ?? "");
@@ -89,13 +96,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function closeAuthModal() { setAuthModalOpen(false); }
 
+  // Ask the server to send our branded verification email for this user. Grabs a
+  // fresh ID token (fast) while signed in, then fires the send WITHOUT blocking —
+  // the UI must not wait on Resend's round-trip.
+  async function requestVerificationEmail(u: User) {
+    const token = await u.getIdToken();
+    void fetch("/api/account/send-verification", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+  }
+
   async function signIn(email: string, password: string): Promise<{ needsVerification: boolean }> {
     const cred = await signInWithEmailAndPassword(auth, email, password);
     // Email verification is REQUIRED. An unverified account can't hold a session:
     // resend the link and sign back out so they must verify first.
     if (!cred.user.emailVerified) {
-      await sendEmailVerification(cred.user).catch(() => {});
-      await firebaseSignOut(auth);
+      await requestVerificationEmail(cred.user).catch(() => {});
+      await firebaseSignOut(auth).catch(() => {});
       return { needsVerification: true };
     }
     // First verified sign-in: fire the branded welcome (deduped server-side, so
@@ -114,11 +132,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signUp(email: string, password: string): Promise<{ needsVerification: boolean }> {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    // Send the verification link, then end the session — the account must be
-    // verified before it can be used (lets us purge unverified/spam signups).
-    // The welcome email is deferred to the first verified sign-in.
-    await sendEmailVerification(cred.user).catch(() => {});
-    await firebaseSignOut(auth);
+    // The account now EXISTS — past here we never report failure (a slow/failed
+    // email or sign-out must not look like a signup error). Fire the branded
+    // verification email (non-blocking), then end the session — the account must
+    // be verified before use. Welcome email waits for the first verified sign-in.
+    await requestVerificationEmail(cred.user).catch(() => {});
+    await firebaseSignOut(auth).catch(() => {});
     return { needsVerification: true };
   }
 
@@ -127,7 +146,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function resetPassword(email: string) {
-    await sendPasswordResetEmail(auth, email);
+    // Branded reset email via our server (Admin SDK link + Resend). Always
+    // resolves ok — the route never reveals whether the account exists.
+    await fetch("/api/account/send-reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
   }
 
   return (

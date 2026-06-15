@@ -59,7 +59,7 @@ export default function AuthModal() {
 
   function friendlyError(code: string) {
     if (code.includes("user-not-found") || code.includes("wrong-password") || code.includes("invalid-credential")) return "Incorrect email or password.";
-    if (code.includes("email-already-in-use")) return "An account with this email already exists.";
+    if (code.includes("email-already-in-use")) return "An account with this email already exists — try signing in instead.";
     if (code.includes("weak-password")) return "Password must be at least 6 characters.";
     if (code.includes("invalid-email")) return "Please enter a valid email address.";
     return "Something went wrong. Please try again.";
@@ -80,7 +80,12 @@ export default function AuthModal() {
         }
       } else if (mode === "signup") {
         await signUp(email, password);
-        setMsg(`Account created. Check ${email} for a verification link, then sign in.`);
+        // Move to the sign-in tab so the next step is clear and the user can't
+        // accidentally re-submit "Create account" (which would error as a dupe).
+        setMode("signin");
+        setPassword("");
+        setConfirm("");
+        setMsg(`Account created. We've emailed ${email} a verification link — verify it, then sign in.`);
       } else {
         await resetPassword(email);
         setMsg("Password reset email sent. Check your inbox.");

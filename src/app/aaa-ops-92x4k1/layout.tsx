@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, User } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import styles from "./admin.module.css";
@@ -48,10 +48,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setErr("");
     setSubmitting(true);
     try {
-      await sendPasswordResetEmail(auth, email);
+      // Branded reset email via our server (Admin SDK link + Resend), same as
+      // the main site. Always shows confirmation — never reveals account existence.
+      await fetch("/api/account/send-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       setResetSent(true);
     } catch {
-      // Don't reveal whether the address exists — show the same confirmation.
       setResetSent(true);
     } finally {
       setSubmitting(false);
