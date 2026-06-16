@@ -52,7 +52,7 @@ export default function CartDrawer() {
                           <span>{it.qty}</span>
                           <button onClick={() => updateQty(it.id, it.qty + 1)}>+</button>
                         </div>
-                        <div className={styles.itemPrice}>£{(it.price * it.qty).toLocaleString()}</div>
+                        <div className={styles.itemPrice}>${(it.price * it.qty).toLocaleString()}</div>
                       </div>
                     </div>
                     <button className={styles.remove} onClick={() => removeFromCart(it.id)} aria-label="Remove">×</button>
@@ -63,9 +63,9 @@ export default function CartDrawer() {
 
             <div className={styles.foot}>
               <div className={styles.totals}>
-                <div><span>Subtotal</span><span>£{subtotal.toLocaleString()}</span></div>
-                <div><span>Shipping</span><span>£{shipping}</span></div>
-                <div className={styles.total}><span>Total</span><span>£{(subtotal + shipping).toLocaleString()}</span></div>
+                <div><span>Subtotal</span><span>${subtotal.toLocaleString()}</span></div>
+                <div><span>Shipping</span><span>${shipping}</span></div>
+                <div className={styles.total}><span>Total</span><span>${(subtotal + shipping).toLocaleString()}</span></div>
               </div>
               <button className={styles.checkout} onClick={goCheckout}>Proceed to checkout →</button>
               <p className={styles.note}>Insured · packed by the studio · signed certificate of authenticity</p>

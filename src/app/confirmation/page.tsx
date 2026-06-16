@@ -56,7 +56,7 @@ function ConfirmationInner() {
         </p>
         <dl className={styles.meta}>
           <div><dt>Order</dt><dd>{orderId}</dd></div>
-          {total > 0 && <div><dt>Total</dt><dd>£{total.toLocaleString()}</dd></div>}
+          {total > 0 && <div><dt>Total</dt><dd>${total.toLocaleString()}</dd></div>}
           <div><dt>Estimated arrival</dt><dd>5–7 working days</dd></div>
         </dl>
         <div className={styles.actions}>

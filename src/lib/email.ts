@@ -53,7 +53,7 @@ export async function sendMail({ to, from, subject, html, text, replyTo }: SendM
 // ── Branded HTML shell ───────────────────────────────────────────────────────
 
 function money(n: number): string {
-  return "£" + n.toLocaleString("en-GB");
+  return "$" + n.toLocaleString("en-GB");
 }
 
 function esc(s: string): string {
@@ -146,7 +146,7 @@ export async function sendOrderConfirmationEmail(order: Order): Promise<void> {
   const rows = order.items.map(itemRowHtml).join("");
   const shipLine = order.shipping > 0
     ? `<tr><td>Shipping · insured</td><td class="num">${money(order.shipping)}</td></tr>`
-    : `<tr><td>Digital — no shipping</td><td class="num">£0</td></tr>`;
+    : `<tr><td>Digital — no shipping</td><td class="num">$0</td></tr>`;
 
   const addressPanel = ship
     ? `<div class="panel"><p class="panel-label">Shipping to</p><p class="panel-text">

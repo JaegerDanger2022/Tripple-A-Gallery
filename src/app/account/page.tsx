@@ -185,7 +185,7 @@ function AccountInner() {
           {totalSpent > 0 && (
             <>
               <span className={styles.dot} />
-              <span>£{totalSpent.toLocaleString()} lifetime</span>
+              <span>${totalSpent.toLocaleString()} lifetime</span>
             </>
           )}
           <button className={styles.signOut} onClick={() => signOut()} title="Sign out">
@@ -262,7 +262,7 @@ function AccountInner() {
                         </span>
                       </div>
                       <div className={styles.lineRight}>
-                        <span className={styles.linePrice}>£{(it.price * it.qty).toLocaleString()}</span>
+                        <span className={styles.linePrice}>${(it.price * it.qty).toLocaleString()}</span>
                         {it.isDigital && (
                           <button
                             className={styles.download}
@@ -279,9 +279,9 @@ function AccountInner() {
 
                 <div className={styles.orderFoot}>
                   <span className={styles.muted}>
-                    {o.shipping > 0 ? `incl. £${o.shipping} shipping` : "digital — no shipping"}
+                    {o.shipping > 0 ? `incl. $${o.shipping} shipping` : "digital — no shipping"}
                   </span>
-                  <span className={styles.orderTotal}>Total £{o.total.toLocaleString()}</span>
+                  <span className={styles.orderTotal}>Total ${o.total.toLocaleString()}</span>
                 </div>
               </li>
             ))}

@@ -72,7 +72,7 @@ function EditRow({
         />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>£</span>
+        <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>$</span>
         <input
           className={styles.fldInput}
           type="number"
@@ -136,7 +136,7 @@ function AddRow({ onAdd }: { onAdd: (data: Omit<FrameOption, "id" | "order">) =>
         />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>£</span>
+        <span style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>$</span>
         <input
           className={styles.fldInput}
           type="number"
@@ -289,7 +289,7 @@ export default function FramesAdmin() {
                     )}
                   </td>
                   <td style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>
-                    {editingId !== f.id && (f.price > 0 ? `£${f.price}` : <span style={{ color: "var(--muted)" }}>—</span>)}
+                    {editingId !== f.id && (f.price > 0 ? `$${f.price}` : <span style={{ color: "var(--muted)" }}>—</span>)}
                   </td>
                   <td>
                     {editingId !== f.id && (

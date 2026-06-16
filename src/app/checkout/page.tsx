@@ -230,7 +230,7 @@ export default function CheckoutPage() {
               <div className="form-actions">
                 <button className="ghost" onClick={() => setStep(2)}>← Back</button>
                 <button className="primary" onClick={payNow} disabled={placing}>
-                  {placing ? "Redirecting…" : user ? `Pay £${total.toLocaleString()} →` : "Sign in to pay →"}
+                  {placing ? "Redirecting…" : user ? `Pay $${total.toLocaleString()} →` : "Sign in to pay →"}
                 </button>
               </div>
             </div>
@@ -251,15 +251,15 @@ export default function CheckoutPage() {
                     <div className={styles.coMeta}>{it.variantLabel}{it.frameId !== "none" ? ` · ${it.frameLabel}` : ""}</div>
                     <div className={styles.coQty}>Qty {it.qty}</div>
                   </div>
-                  <div className={styles.coPrice}>£{(it.price * it.qty).toLocaleString()}</div>
+                  <div className={styles.coPrice}>${(it.price * it.qty).toLocaleString()}</div>
                 </li>
               );
             })}
           </ul>
           <dl className={styles.totals}>
-            <div><dt>Subtotal</dt><dd>£{subtotal.toLocaleString()}</dd></div>
-            <div><dt>Shipping</dt><dd>£{shipping}</dd></div>
-            <div className={styles.totalRow}><dt>Total</dt><dd>£{total.toLocaleString()}</dd></div>
+            <div><dt>Subtotal</dt><dd>${subtotal.toLocaleString()}</dd></div>
+            <div><dt>Shipping</dt><dd>${shipping}</dd></div>
+            <div className={styles.totalRow}><dt>Total</dt><dd>${total.toLocaleString()}</dd></div>
           </dl>
           <p className={styles.coNote}>Ships within 5–7 working days. Originals are packed in custom crates; expect +3 days.</p>
         </aside>

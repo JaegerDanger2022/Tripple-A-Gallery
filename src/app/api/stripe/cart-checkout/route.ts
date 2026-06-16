@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Flat shipping for any order containing a physical item (mirrors the cart UI).
-const SHIPPING_GBP = 24;
+const SHIPPING_FEE = 24;
 
 function bad(msg: string, status = 400) {
   return NextResponse.json({ error: msg }, { status });
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     lineItems.push({
       quantity: qty,
       price_data: {
-        currency: "gbp",
+        currency: "usd",
         unit_amount: Math.round(resolved.unitPrice * 100),
         product_data: {
           name: `Lot ${artwork.lotNumber} — ${resolved.variantLabel}${frameSuffix}`,
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   }
 
   const subtotal = orderItems.reduce((s, it) => s + it.price * it.qty, 0);
-  const shipping = hasPhysical ? SHIPPING_GBP : 0;
+  const shipping = hasPhysical ? SHIPPING_FEE : 0;
   const total = subtotal + shipping;
   const orderId = "AI-" + Math.random().toString(36).slice(2, 8).toUpperCase();
 
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
         ? [{
             shipping_rate_data: {
               type: "fixed_amount",
-              fixed_amount: { amount: SHIPPING_GBP * 100, currency: "gbp" },
+              fixed_amount: { amount: SHIPPING_FEE * 100, currency: "usd" },
               display_name: "Studio shipping · insured",
             },
           }]

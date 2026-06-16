@@ -18,7 +18,7 @@ export default function ShippingPage() {
 
         <div className={styles.section}>
           <h2>Shipping</h2>
-          <p>We ship worldwide via tracked, insured courier. A flat shipping contribution of £24 is added at checkout for all orders. For orders outside the United Kingdom, import duties and local taxes may apply — these are the buyer&apos;s responsibility. Delivery typically takes:</p>
+          <p>We ship worldwide via tracked, insured courier. A flat shipping contribution of $24 is added at checkout for all orders. For orders outside the United Kingdom, import duties and local taxes may apply — these are the buyer&apos;s responsibility. Delivery typically takes:</p>
           <ul>
             <li><strong>United Kingdom</strong> — 2–4 business days</li>
             <li><strong>Europe</strong> — 5–8 business days</li>

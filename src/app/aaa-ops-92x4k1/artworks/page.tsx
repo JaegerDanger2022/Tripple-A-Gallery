@@ -120,7 +120,7 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
               <input className={styles.fldInput} type="number" value={form.year ?? ""} onChange={(e) => set("year", Number(e.target.value))} placeholder="e.g. 2024" />
             </div>
             <div className={styles.fld}>
-              <label className={styles.fldLbl}>Price (£)</label>
+              <label className={styles.fldLbl}>Price ($)</label>
               <input className={styles.fldInput} type="number" required min={0} value={form.price} onChange={(e) => set("price", Number(e.target.value))} />
             </div>
           </div>
@@ -358,7 +358,7 @@ export default function ArtworksAdmin() {
                   <td><span className={styles.badge}>{a.category}</span></td>
                   <td style={{ fontFamily: "var(--f-mono)", fontSize: 12, color: "var(--muted)" }}>{a.year}</td>
                   <td style={{ fontFamily: "var(--f-mono)", fontSize: 13 }}>
-                    £{a.price.toLocaleString()}
+                    ${a.price.toLocaleString()}
                     {a.soldOut && (
                       <span style={{ marginLeft: 8, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#c0392b", background: "#fff", border: "1px solid #c0392b", borderRadius: 999, padding: "2px 7px" }}>
                         Sold

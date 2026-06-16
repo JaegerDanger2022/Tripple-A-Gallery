@@ -105,7 +105,7 @@ function FormatDrawer({
 
           {form.priceMode === "fixed" ? (
             <div className={styles.fld}>
-              <label className={styles.fldLbl}>Price (£)</label>
+              <label className={styles.fldLbl}>Price ($)</label>
               <input
                 className={styles.fldInput}
                 type="number"
@@ -132,7 +132,7 @@ function FormatDrawer({
                 />
               </div>
               <div className={styles.fld}>
-                <label className={styles.fldLbl}>+ flat amount (£)</label>
+                <label className={styles.fldLbl}>+ flat amount ($)</label>
                 <input
                   className={styles.fldInput}
                   type="number"
@@ -302,8 +302,8 @@ export default function FormatsAdmin() {
                   <td style={{ fontSize: 12, color: "var(--muted)", maxWidth: 200 }}>{f.description}</td>
                   <td style={{ fontFamily: "var(--f-mono)", fontSize: 12, whiteSpace: "nowrap" }}>
                     {f.priceMode === "fixed"
-                      ? `£${f.fixedPrice}`
-                      : `${(f.percentBase * 100).toFixed(0)}% + £${f.percentAdd}`}
+                      ? `$${f.fixedPrice}`
+                      : `${(f.percentBase * 100).toFixed(0)}% + $${f.percentAdd}`}
                   </td>
                   <td>
                     <span className={styles.badge} style={f.enabled ? { background: "color-mix(in oklab, green 12%, transparent)", color: "green" } : {}}>

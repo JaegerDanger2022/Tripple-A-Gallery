@@ -180,7 +180,7 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                             <span className={styles.vContact}>Contact for price</span>
                           )
                         ) : (
-                          <span className={styles.vPrice}>£{vv.price.toLocaleString()}</span>
+                          <span className={styles.vPrice}>${vv.price.toLocaleString()}</span>
                         )}
                       </button>
                     ))}
@@ -200,7 +200,7 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                         <span className={`${styles.fsw} ${f.price === 0 ? styles.fswUnframed : ""}`} style={f.price > 0 ? { background: f.color } : undefined} />
                         <span>{f.name}</span>
                         {f.price
-                          ? <span className={styles.fPrice}>+£{f.price}</span>
+                          ? <span className={styles.fPrice}>+${f.price}</span>
                           : <span className={`${styles.fPrice} ${styles.fPriceFree}`}>—</span>}
                       </button>
                     ))}
@@ -214,7 +214,7 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
                     {v?.isOriginal ? (
                       <span className={styles.buyTotalVal}>{a.soldOut ? "Sold" : "Contact for price"}</span>
                     ) : (
-                      <span className={styles.buyTotalVal}>£{total.toLocaleString()}</span>
+                      <span className={styles.buyTotalVal}>${total.toLocaleString()}</span>
                     )}
                   </div>
                   <span className={styles.buyTotalNote}>
