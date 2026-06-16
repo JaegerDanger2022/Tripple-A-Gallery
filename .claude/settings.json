@@ -68,7 +68,14 @@
       "Bash(git ls-files *)",
       "Bash(git fetch *)",
       "Bash(sed -i 's/Tripple A Gallery/Triple A Gallery/g' src/lib/email.ts src/app/auth/action/page.tsx src/emails/email-change.html src/emails/email-verification.html src/emails/mfa-enrollment.html src/emails/password-reset.html)",
-      "Bash(grep -rn \"Tripple A Gallery\" src/)"
+      "Bash(grep -rn \"Tripple A Gallery\" src/)",
+      "Bash(firebase apphosting:backends:list)",
+      "Bash(firebase apphosting:rollouts:list tripple-a-gallery)",
+      "Bash(firebase apphosting:secrets:describe PURGE_SECRET)",
+      "Bash(firebase apphosting:secrets:describe RESEND_API_KEY)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(24\\).toString\\('base64url'\\)\\)\")",
+      "Bash(firebase apphosting:rollouts:create --help)",
+      "Bash(firebase apphosting:rollouts:create tripple-a-gallery -b main -f)"
     ],
     "additionalDirectories": [
       "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"

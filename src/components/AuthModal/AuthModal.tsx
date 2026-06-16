@@ -74,7 +74,7 @@ export default function AuthModal() {
       if (mode === "signin") {
         const { needsVerification } = await signIn(email, password);
         if (needsVerification) {
-          setMsg(`Please verify your email to sign in — we've sent a new link to ${email}.`);
+          setErr(`Verify your email before signing in — we've sent a new link to ${email}.`);
         } else {
           closeAuthModal();
         }

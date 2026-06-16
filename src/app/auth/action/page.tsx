@@ -82,8 +82,15 @@ function ActionInner() {
         }
       } catch {
         setView("error");
-        setHeading("This link has expired");
-        setMessage("For your security, these links are single-use and time-limited. Please request a fresh one.");
+        if (mode === "verifyEmail" || mode === "verifyAndChangeEmail") {
+          // The account may have been removed (unverified accounts are purged),
+          // which invalidates the link — guide them to start over.
+          setHeading("This link is no longer valid");
+          setMessage("Your verification link has expired, or the account was removed because it wasn't verified in time. Please create your account again — it only takes a moment.");
+        } else {
+          setHeading("This link has expired");
+          setMessage("For your security, these links are single-use and time-limited. Please request a fresh one.");
+        }
       }
     })();
   }, [mode, oobCode]);
@@ -153,7 +160,14 @@ function ActionInner() {
             <h1 className={styles.heading}>{heading}</h1>
             <p className={styles.body}>{message}</p>
             <div className={styles.actions}>
-              <button className="primary" onClick={() => router.push("/")}>Back to the gallery</button>
+              {mode === "verifyEmail" || mode === "verifyAndChangeEmail" ? (
+                <>
+                  <button className="primary" onClick={() => { router.push("/"); openAuthModal("signup"); }}>Create an account →</button>
+                  <button className="ghost" onClick={() => { router.push("/"); openAuthModal("signin"); }}>Sign in</button>
+                </>
+              ) : (
+                <button className="primary" onClick={() => router.push("/")}>Back to the gallery</button>
+              )}
             </div>
           </>
         )}
