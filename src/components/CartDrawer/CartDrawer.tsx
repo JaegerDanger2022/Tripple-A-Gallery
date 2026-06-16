@@ -6,11 +6,13 @@ import ArtPlaceholder from "@/components/ArtPlaceholder/ArtPlaceholder";
 import styles from "./CartDrawer.module.css";
 
 export default function CartDrawer() {
-  const { cart, cartOpen, setCartOpen, removeFromCart, updateQty, artworks } = useApp();
+  const { cart, cartOpen, setCartOpen, removeFromCart, updateQty, artworks, shippingFee } = useApp();
   const router = useRouter();
 
   const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);
-  const shipping = cart.length ? 24 : 0;
+  // Only physical items incur shipping; use the admin-set fee (matches checkout).
+  const hasPhysical = cart.some((it) => !it.isDigital);
+  const shipping = hasPhysical ? shippingFee : 0;
 
   function goCheckout() {
     setCartOpen(false);
