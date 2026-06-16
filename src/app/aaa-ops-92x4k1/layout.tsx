@@ -207,6 +207,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/aaa-ops-92x4k1/formats" className={pathname.startsWith("/aaa-ops-92x4k1/formats") ? styles.active : ""}>
             <span className={styles.navIcon}>◫</span> Formats
           </Link>
+          <Link href="/aaa-ops-92x4k1/shipping" className={pathname.startsWith("/aaa-ops-92x4k1/shipping") ? styles.active : ""}>
+            <span className={styles.navIcon}>⊞</span> Shipping
+          </Link>
           <Link href="/aaa-ops-92x4k1/users" className={pathname.startsWith("/aaa-ops-92x4k1/users") ? styles.active : ""}>
             <span className={styles.navIcon}>◉</span> Users
           </Link>

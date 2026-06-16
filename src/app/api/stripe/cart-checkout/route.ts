@@ -2,16 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
 import { stripe } from "@/lib/stripe";
-import { resolveLine } from "@/lib/pricing";
+import { resolveLine, DEFAULT_SHIPPING_FEE } from "@/lib/pricing";
 import { adminCreatePendingOrder } from "@/lib/orderAdmin";
 import { publicOrigin } from "@/lib/requestOrigin";
 import type { Artwork, FormatOption, FrameOption, OrderItem, ShippingAddress } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-// Flat shipping for any order containing a physical item (mirrors the cart UI).
-const SHIPPING_FEE = 24;
 
 function bad(msg: string, status = 400) {
   return NextResponse.json({ error: msg }, { status });
@@ -58,17 +55,20 @@ export async function POST(req: NextRequest) {
   if (incoming.length === 0) return bad("Your cart is empty.");
   if (incoming.length > 50) return bad("Too many items in one order.");
 
-  // 3) Load the catalogue server-side — the source of truth for pricing.
-  const [artSnap, fmtSnap, frmSnap] = await Promise.all([
+  // 3) Load the catalogue + shipping setting server-side — the source of truth.
+  const [artSnap, fmtSnap, frmSnap, shipSnap] = await Promise.all([
     adminDb.collection("artworks").get(),
     adminDb.collection("formats").get(),
     adminDb.collection("frames").get(),
+    adminDb.collection("settings").doc("shipping").get(),
   ]);
   const artworks = new Map<string, Artwork>(
     artSnap.docs.map((d) => [d.id, { id: d.id, ...d.data() } as Artwork])
   );
   const formats = fmtSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FormatOption));
   const frames = frmSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FrameOption));
+  const shipFeeRaw = shipSnap.exists ? shipSnap.data()?.fee : undefined;
+  const shippingFee = typeof shipFeeRaw === "number" && shipFeeRaw >= 0 ? shipFeeRaw : DEFAULT_SHIPPING_FEE;
 
   // 4) Resolve every line authoritatively → order items + Stripe line items.
   const orderItems: OrderItem[] = [];
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   }
 
   const subtotal = orderItems.reduce((s, it) => s + it.price * it.qty, 0);
-  const shipping = hasPhysical ? SHIPPING_FEE : 0;
+  const shipping = hasPhysical ? shippingFee : 0;
   const total = subtotal + shipping;
   const orderId = "AI-" + Math.random().toString(36).slice(2, 8).toUpperCase();
 
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
         ? [{
             shipping_rate_data: {
               type: "fixed_amount",
-              fixed_amount: { amount: SHIPPING_FEE * 100, currency: "usd" },
+              fixed_amount: { amount: shippingFee * 100, currency: "usd" },
               display_name: "Studio shipping · insured",
             },
           }]

@@ -5,8 +5,13 @@
 import type { Artwork, FormatOption, FrameOption, Variant } from "./types";
 import { getVariants } from "./data";
 
-// Price (£) for the digital download option — flat for any work.
+// Price for the digital download option — flat for any work.
 export const DIGITAL_PRICE = 15;
+
+// Fallback flat shipping fee (physical orders) when the admin setting is unset.
+// The live value is stored in Firestore (settings/shipping) and editable in the
+// admin panel; this is only used if that read fails or hasn't been configured.
+export const DEFAULT_SHIPPING_FEE = 24;
 
 const UNFRAMED: FrameOption = { id: "none", name: "Unframed", color: "#e8e4dc", price: 0, order: -1 };
 

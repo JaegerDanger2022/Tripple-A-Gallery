@@ -23,6 +23,7 @@ import { db, storage } from "./firebase";
 import type { Artwork, Category, FrameOption, FormatOption, Order, Tier, UserProfile } from "./types";
 import { ARTWORKS as SEED_ARTWORKS } from "./data";
 import { assignWorks } from "./tier";
+import { DEFAULT_SHIPPING_FEE } from "./pricing";
 
 // ── Collections ─────────────────────────────────────────────────────────────
 
@@ -30,6 +31,26 @@ const artworksCol = () => collection(db, "artworks");
 const categoriesCol = () => collection(db, "categories");
 const framesCol = () => collection(db, "frames");
 const formatsCol = () => collection(db, "formats");
+
+// ── Settings (admin-editable) ─────────────────────────────────────────────────
+
+const settingsDoc = (id: string) => doc(db, "settings", id);
+
+/** The flat shipping fee, set in the admin panel. Falls back to the default. */
+export async function getShippingFee(): Promise<number> {
+  try {
+    const snap = await getDoc(settingsDoc("shipping"));
+    const fee = snap.exists() ? snap.data()?.fee : undefined;
+    return typeof fee === "number" && fee >= 0 ? fee : DEFAULT_SHIPPING_FEE;
+  } catch {
+    return DEFAULT_SHIPPING_FEE;
+  }
+}
+
+/** Save the flat shipping fee (admin only — guarded by Firestore rules). */
+export async function setShippingFee(fee: number): Promise<void> {
+  await setDoc(settingsDoc("shipping"), { fee, updatedAt: serverTimestamp() }, { merge: true });
+}
 
 // ── Artworks ─────────────────────────────────────────────────────────────────
 

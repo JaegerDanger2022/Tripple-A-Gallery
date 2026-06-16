@@ -48,7 +48,7 @@ function SelectField({ label, value, onChange, options, error }: {
 }
 
 export default function CheckoutPage() {
-  const { cart, artworks } = useApp();
+  const { cart, artworks, shippingFee } = useApp();
   const { user, authLoading, openAuthModal } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
   const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);
   // Digital downloads aren't shipped — only charge shipping when a physical item is present.
   const hasPhysical = cart.some((it) => !it.isDigital);
-  const shipping = hasPhysical ? 24 : 0;
+  const shipping = hasPhysical ? shippingFee : 0;
   const total = subtotal + shipping;
 
   function set(k: string, v: string) {

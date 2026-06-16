@@ -32,6 +32,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Settings (shipping fee, etc.) — public read (checkout shows the fee),
+    // admin write. The server recomputes shipping from here too (Admin SDK).
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Admins — a user can only read their own doc
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
