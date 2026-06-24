@@ -5,8 +5,10 @@
 import type { Artwork, FormatOption, FrameOption, Variant } from "./types";
 import { getVariants } from "./data";
 
-// Price for the digital download option — flat for any work.
-export const DIGITAL_PRICE = 15;
+// Default price for the digital download option. The live value is stored in
+// Firestore (settings/digital) and editable in the admin panel; this is only
+// used if that read fails or hasn't been configured.
+export const DIGITAL_PRICE = 0.99;
 
 // Fallback flat shipping fee (physical orders) when the admin setting is unset.
 // The live value is stored in Firestore (settings/shipping) and editable in the
@@ -18,9 +20,14 @@ const UNFRAMED: FrameOption = { id: "none", name: "Unframed", color: "#e8e4dc", 
 /**
  * The selectable formats/variants for an artwork. Prefers admin-configured
  * Firestore formats; falls back to the static defaults. Prepends the digital
- * download when the work has a private hi-res file.
+ * download when the work has a private hi-res file AND digital sales are enabled
+ * for it (`digitalEnabled !== false`), priced at the admin-set `digitalPrice`.
  */
-export function buildVariants(a: Artwork, formats: FormatOption[]): Variant[] {
+export function buildVariants(
+  a: Artwork,
+  formats: FormatOption[],
+  digitalPrice: number = DIGITAL_PRICE
+): Variant[] {
   const base: Variant[] = formats.length > 0
     ? formats
         .filter((f) => f.enabled)
@@ -39,12 +46,12 @@ export function buildVariants(a: Artwork, formats: FormatOption[]): Variant[] {
         })
     : getVariants(a);
 
-  if (a.hiResPath) {
+  if (a.hiResPath && a.digitalEnabled !== false) {
     const digital: Variant = {
       id: "digital",
       label: "Digital download",
       sub: "High-res image · instant download · personal use",
-      price: DIGITAL_PRICE,
+      price: digitalPrice,
       isDigital: true,
     };
     return [digital, ...base];
@@ -74,9 +81,10 @@ export function resolveLine(
   a: Artwork,
   formats: FormatOption[],
   frames: FrameOption[],
-  sel: { variantId: string; frameId: string }
+  sel: { variantId: string; frameId: string },
+  digitalPrice: number = DIGITAL_PRICE
 ): ResolvedLine | null {
-  const v = buildVariants(a, formats).find((x) => x.id === sel.variantId);
+  const v = buildVariants(a, formats, digitalPrice).find((x) => x.id === sel.variantId);
   if (!v || v.isOriginal) return null;
 
   if (v.isDigital) {

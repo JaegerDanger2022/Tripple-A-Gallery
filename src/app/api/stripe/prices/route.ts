@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchTierPricing } from "@/lib/stripe";
+import { fetchTierPricing, stripeSecretKey } from "@/lib/stripe";
 
 // Reads the Stripe secret — Node runtime. Prices change rarely, so cache the
 // response for an hour rather than hitting Stripe on every page load.
@@ -13,7 +13,7 @@ export const revalidate = 3600;
  * minor units (pence). Unconfigured prices come back as null.
  */
 export async function GET() {
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!stripeSecretKey()) {
     return NextResponse.json({ error: "Payments are not configured yet." }, { status: 503 });
   }
   try {

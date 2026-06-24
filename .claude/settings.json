@@ -75,10 +75,30 @@
       "Bash(firebase apphosting:secrets:describe RESEND_API_KEY)",
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(24\\).toString\\('base64url'\\)\\)\")",
       "Bash(firebase apphosting:rollouts:create --help)",
-      "Bash(firebase apphosting:rollouts:create tripple-a-gallery -b main -f)"
+      "Bash(firebase apphosting:rollouts:create tripple-a-gallery -b main -f)",
+      "Bash(command -v magick montage convert)",
+      "Bash(node -e \"require\\('sharp'\\); console.log\\('sharp OK', require\\('sharp/package.json'\\).version\\)\")",
+      "Bash(node -e \"require\\('sharp'\\)\")",
+      "Bash(command -v python python3 magick mogrify)",
+      "Bash(python -c \"import PIL; print\\('PIL', PIL.__version__\\)\")",
+      "Bash(python contact_sheet.py)",
+      "Bash(python compare.py)",
+      "Bash(python verify.py)",
+      "Bash(python final.py)",
+      "Bash(python -c ' *)",
+      "Bash(python rename_drive.py)",
+      "Bash(grep -iE \"money|locale|fixed|\\\\\\\\$\\\\{|price|subtotal|total\")",
+      "Bash(git --no-pager diff --stat)",
+      "Bash(git --no-pager diff .claude/settings.json)",
+      "Bash(node -e ' *)",
+      "Bash(node scripts/upload-hires.mjs \"G:\\\\My Drive\\\\Tripple-A-Gallery\\\\Originals\")",
+      "Bash(node scripts/add-new-lot.mjs TA22 \"G:\\\\My Drive\\\\Tripple-A-Gallery\\\\Originals\\\\TA22.png\")",
+      "Bash(npm run *)",
+      "Bash(GOOGLE_APPLICATION_CREDENTIALS=C:/Users/mkmen/Documents/GitHub/BUSINESS_REPOS/Tripple-A-Gallery/tripple-a-gallery-firebase-adminsdk-fbsvc-d638c10ac2.json node -e ' *)"
     ],
     "additionalDirectories": [
-      "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery"
+      "c:\\Users\\mkmen\\Documents\\GitHub\\BUSINESS_REPOS\\Tripple-A-Gallery",
+      "G:\\My Drive\\Tripple-A-Gallery\\Originals"
     ]
   }
 }

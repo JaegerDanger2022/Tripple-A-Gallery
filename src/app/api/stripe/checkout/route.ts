@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
-import { stripe, priceIdFor, type BillingInterval } from "@/lib/stripe";
+import { stripe, priceIdFor, stripeSecretKey, type BillingInterval } from "@/lib/stripe";
 
 // Touches the Admin SDK + Stripe secret — Node runtime, never cached.
 export const runtime = "nodejs";
@@ -27,7 +27,7 @@ function publicOrigin(req: NextRequest): string {
 }
 
 export async function POST(req: NextRequest) {
-  if (!process.env.STRIPE_SECRET_KEY) return bad("Payments are not configured yet.", 503);
+  if (!stripeSecretKey()) return bad("Payments are not configured yet.", 503);
 
   // 1) Verify the caller's Firebase ID token.
   const authz = req.headers.get("authorization") ?? "";

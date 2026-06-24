@@ -9,6 +9,7 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
   query,
   where,
   orderBy,
@@ -20,10 +21,10 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { db, storage } from "./firebase";
-import type { Artwork, Category, FrameOption, FormatOption, Order, Tier, UserProfile } from "./types";
+import type { Artwork, Category, FrameOption, FormatOption, Order, ShippingAddress, Tier, UserProfile } from "./types";
 import { ARTWORKS as SEED_ARTWORKS } from "./data";
 import { assignWorks } from "./tier";
-import { DEFAULT_SHIPPING_FEE } from "./pricing";
+import { DEFAULT_SHIPPING_FEE, DIGITAL_PRICE } from "./pricing";
 
 // ── Collections ─────────────────────────────────────────────────────────────
 
@@ -50,6 +51,22 @@ export async function getShippingFee(): Promise<number> {
 /** Save the flat shipping fee (admin only — guarded by Firestore rules). */
 export async function setShippingFee(fee: number): Promise<void> {
   await setDoc(settingsDoc("shipping"), { fee, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+/** The digital-download price (flat, any work), set in the admin panel. */
+export async function getDigitalPrice(): Promise<number> {
+  try {
+    const snap = await getDoc(settingsDoc("digital"));
+    const price = snap.exists() ? snap.data()?.price : undefined;
+    return typeof price === "number" && price >= 0 ? price : DIGITAL_PRICE;
+  } catch {
+    return DIGITAL_PRICE;
+  }
+}
+
+/** Save the digital-download price (admin only — guarded by Firestore rules). */
+export async function setDigitalPrice(price: number): Promise<void> {
+  await setDoc(settingsDoc("digital"), { price, updatedAt: serverTimestamp() }, { merge: true });
 }
 
 // ── Artworks ─────────────────────────────────────────────────────────────────
@@ -272,6 +289,16 @@ export async function setUserTier(uid: string, tier: Tier, lock = true): Promise
 /** Admin: toggle the tier lock without changing the tier itself. */
 export async function setUserTierLock(uid: string, locked: boolean): Promise<void> {
   await updateDoc(doc(db, "users", uid), { adminTierLock: locked, updatedAt: Date.now() });
+}
+
+/** Save the user's shipping address (pre-fills checkout; editable in account). */
+export async function setUserShipTo(uid: string, shipTo: ShippingAddress): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { shipTo, updatedAt: Date.now() });
+}
+
+/** Remove the user's saved shipping address. */
+export async function removeUserShipTo(uid: string): Promise<void> {
+  await updateDoc(doc(db, "users", uid), { shipTo: deleteField(), updatedAt: Date.now() });
 }
 
 /** Admin: list all user profiles, newest first. */

@@ -22,6 +22,7 @@ const BLANK: Omit<Artwork, "id"> = {
   blurb: "",
   imageUrl: "",
   hiResPath: "",
+  digitalEnabled: true,
   order: 0,
 };
 
@@ -205,8 +206,27 @@ function ArtworkDrawer({ initial, categories, onSave, onClose, saving }: DrawerP
               )}
             </div>
             {uploadErr && <p style={{ fontSize: 12, color: "var(--accent)", margin: "6px 0 0" }}>{uploadErr}</p>}
+            {form.hiResPath && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+                <span style={{ fontSize: 13 }}>
+                  Digital download:{" "}
+                  <strong style={{ color: form.digitalEnabled !== false ? "var(--ink)" : "var(--muted)" }}>
+                    {form.digitalEnabled !== false ? "On sale" : "Off"}
+                  </strong>
+                </span>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => set("digitalEnabled", form.digitalEnabled === false)}
+                  style={{ fontSize: 12, padding: "6px 12px", border: "1px solid var(--line)", borderRadius: 4 }}
+                >
+                  {form.digitalEnabled !== false ? "Disable" : "Enable"}
+                </button>
+              </div>
+            )}
             <p style={{ fontSize: 12, color: "var(--muted)", margin: "6px 0 0" }}>
               Full-resolution file buyers receive when they purchase the digital download. Stored privately in Firebase Storage — released only to verified buyers via a secure link.
+              {form.hiResPath && " Use Disable to stop selling the download without removing the file."}
             </p>
           </div>
 

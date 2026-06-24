@@ -71,7 +71,7 @@ export default function DetailPage({ params }: { params: Promise<{ id: string }>
 
 function DetailInner({ artwork: a }: { artwork: Artwork }) {
   const router = useRouter();
-  const { addToCart, revealArtwork, revealedArtworks, artworks, frames, formats } = useApp();
+  const { addToCart, revealArtwork, revealedArtworks, artworks, frames, formats, digitalPrice } = useApp();
   const [variantId, setVariantId] = useState<string>("");
   const [frameId, setFrameId] = useState<string>("none");
   const [added, setAdded] = useState(false);
@@ -83,7 +83,7 @@ function DetailInner({ artwork: a }: { artwork: Artwork }) {
   // Build the variant + frame lists from the shared pricing module, so what's
   // shown here matches exactly what the checkout API recomputes and charges.
   // (Digital download is included when the work has a private hi-res file.)
-  const variants = buildVariants(a, formats);
+  const variants = buildVariants(a, formats, digitalPrice);
   const v = variants.find((x) => x.id === variantId) ?? variants[0];
 
   const frameOpts = frameOptions(frames);

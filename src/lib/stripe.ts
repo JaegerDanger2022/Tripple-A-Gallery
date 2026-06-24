@@ -3,16 +3,46 @@
 import Stripe from "stripe";
 import type { Tier } from "./types";
 
+// ── Test/Live mode switch ──────────────────────────────────────────────────
+// One toggle controls everything: STRIPE_MODE=test|live (defaults to "test",
+// the safe choice). For each credential we prefer the mode-specific variable
+// (…_TEST / …_LIVE) and fall back to the legacy un-suffixed variable, so an
+// existing single-key setup keeps working unchanged.
+export type StripeMode = "test" | "live";
+
+export function stripeMode(): StripeMode {
+  return (process.env.STRIPE_MODE ?? "").toLowerCase() === "live" ? "live" : "test";
+}
+
+/** Resolve an env var for the active mode: `${base}_TEST|_LIVE` then bare `${base}`. */
+function envForMode(base: string): string | undefined {
+  const specific = process.env[`${base}_${stripeMode().toUpperCase()}`];
+  return specific ?? process.env[base];
+}
+
+/** The active Stripe secret key for the current mode. */
+export function stripeSecretKey(): string | undefined {
+  return envForMode("STRIPE_SECRET_KEY");
+}
+
+/** The active webhook signing secret for the current mode. */
+export function stripeWebhookSecret(): string | undefined {
+  return envForMode("STRIPE_WEBHOOK_SECRET");
+}
+
 // Lazily construct the Stripe client so importing this module never throws when
-// STRIPE_SECRET_KEY is absent (e.g. during build's page-data collection). The
-// API routes guard on the env var and return a clear 503 before calling in.
+// the secret key is absent (e.g. during build's page-data collection). The API
+// routes guard on stripeSecretKey() and return a clear 503 before calling in.
+// Rebuild if the resolved key changes (e.g. mode flipped between requests).
 let _stripe: Stripe | null = null;
+let _stripeKey: string | null = null;
 function getStripe(): Stripe {
-  if (_stripe) return _stripe;
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not set");
+  const secretKey = stripeSecretKey();
+  if (!secretKey) throw new Error("Stripe secret key is not set (STRIPE_SECRET_KEY or STRIPE_SECRET_KEY_TEST/_LIVE).");
+  if (_stripe && _stripeKey === secretKey) return _stripe;
   // Let the SDK use its pinned API version (matches the installed major).
   _stripe = new Stripe(secretKey);
+  _stripeKey = secretKey;
   return _stripe;
 }
 
@@ -29,31 +59,26 @@ export const stripe: Stripe = new Proxy({} as Stripe, {
 
 export type BillingInterval = "month" | "year";
 
-// Stripe Price IDs come from env so they're never hardcoded. Create the
-// products/prices in the Stripe dashboard (see the README / setup notes) and
-// paste the IDs into .env.local.
-const PRICE_IDS: Record<1 | 2, Record<BillingInterval, string | undefined>> = {
-  1: {
-    month: process.env.STRIPE_PRICE_TIER1_MONTHLY,
-    year: process.env.STRIPE_PRICE_TIER1_YEARLY,
-  },
-  2: {
-    month: process.env.STRIPE_PRICE_TIER2_MONTHLY,
-    year: process.env.STRIPE_PRICE_TIER2_YEARLY,
-  },
-};
+// Stripe Price IDs come from env so they're never hardcoded, and are mode-aware:
+// STRIPE_PRICE_TIER1_MONTHLY_TEST / _LIVE (falling back to the un-suffixed name).
+// Create the products/prices in the Stripe dashboard (test AND live) and paste
+// the IDs into .env.local / apphosting.yaml.
+function priceEnvBase(tier: 1 | 2, interval: BillingInterval): string {
+  return `STRIPE_PRICE_TIER${tier}_${interval === "month" ? "MONTHLY" : "YEARLY"}`;
+}
 
-/** The Stripe Price ID for a paid tier + interval, or undefined if not configured. */
+/** The Stripe Price ID for a paid tier + interval (current mode), or undefined. */
 export function priceIdFor(tier: 1 | 2, interval: BillingInterval): string | undefined {
-  return PRICE_IDS[tier]?.[interval];
+  return envForMode(priceEnvBase(tier, interval));
 }
 
 /** Reverse-map a Stripe Price ID back to the tier it grants (for fulfilment). */
 export function tierForPriceId(priceId: string | null | undefined): Tier | null {
   if (!priceId) return null;
   for (const tier of [1, 2] as const) {
-    const ivals = PRICE_IDS[tier];
-    if (ivals.month === priceId || ivals.year === priceId) return tier;
+    for (const interval of ["month", "year"] as const) {
+      if (priceIdFor(tier, interval) === priceId) return tier;
+    }
   }
   return null;
 }
@@ -85,7 +110,7 @@ export async function fetchTierPricing(): Promise<PricingResponse> {
   const lookups: Array<{ tier: 1 | 2; interval: BillingInterval; id: string }> = [];
   for (const tier of [1, 2] as const) {
     for (const interval of ["month", "year"] as const) {
-      const id = PRICE_IDS[tier][interval];
+      const id = priceIdFor(tier, interval);
       if (id) lookups.push({ tier, interval, id });
     }
   }

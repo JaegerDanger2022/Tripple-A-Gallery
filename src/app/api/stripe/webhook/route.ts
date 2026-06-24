@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { stripe, tierForPriceId } from "@/lib/stripe";
+import { stripe, tierForPriceId, stripeSecretKey, stripeWebhookSecret } from "@/lib/stripe";
 import { adminSetTier, adminLinkStripe, adminUidForCustomer, adminIsTierLocked } from "@/lib/userAdmin";
 import { adminMarkOrderPaid } from "@/lib/orderAdmin";
 import { notifyMembershipChange } from "@/lib/membership";
@@ -11,8 +11,6 @@ import type { Tier } from "@/lib/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
 /**
  * Stripe subscription lifecycle → tier. The success-redirect (/api/stripe/confirm)
  * grants tier on purchase; this webhook keeps it in sync afterwards:
@@ -22,7 +20,8 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
  * touched, so they fall back to exactly what they originally had.
  */
 export async function POST(req: NextRequest) {
-  if (!process.env.STRIPE_SECRET_KEY || !webhookSecret) {
+  const webhookSecret = stripeWebhookSecret();
+  if (!stripeSecretKey() || !webhookSecret) {
     return NextResponse.json({ error: "Webhook not configured." }, { status: 503 });
   }
 

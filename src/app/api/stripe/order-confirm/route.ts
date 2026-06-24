@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
-import { stripe } from "@/lib/stripe";
+import { stripe, stripeSecretKey } from "@/lib/stripe";
 import { adminMarkOrderPaid } from "@/lib/orderAdmin";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 
@@ -18,7 +18,7 @@ function bad(msg: string, status = 400) {
  * tab before this runs. Idempotent — safe to call more than once.
  */
 export async function POST(req: NextRequest) {
-  if (!process.env.STRIPE_SECRET_KEY) return bad("Payments are not configured yet.", 503);
+  if (!stripeSecretKey()) return bad("Payments are not configured yet.", 503);
 
   const authz = req.headers.get("authorization") ?? "";
   const token = authz.startsWith("Bearer ") ? authz.slice(7) : null;
@@ -64,5 +64,10 @@ export async function POST(req: NextRequest) {
     try { await sendOrderConfirmationEmail(result.order); } catch { /* mail is non-critical */ }
   }
 
-  return NextResponse.json({ ok: true, orderId, total: result.order.total });
+  return NextResponse.json({
+    ok: true,
+    orderId,
+    total: result.order.total,
+    items: result.order.items,
+  });
 }

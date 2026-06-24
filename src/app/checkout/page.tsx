@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
@@ -49,7 +49,7 @@ function SelectField({ label, value, onChange, options, error }: {
 
 export default function CheckoutPage() {
   const { cart, artworks, shippingFee } = useApp();
-  const { user, authLoading, openAuthModal } = useAuth();
+  const { user, authLoading, openAuthModal, profile } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -61,6 +61,41 @@ export default function CheckoutPage() {
     if (user?.email) setForm((f) => ({ ...f, email: f.email || user.email! }));
   }, [user]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Saved shipping address (from the user's profile, written on their last
+  // checkout). When present we default to it and let the buyer enter a new one.
+  const saved = profile?.shipTo;
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const prefilled = useRef(false);
+
+  // Pre-fill the address form from the saved address once, when it first loads.
+  useEffect(() => {
+    if (saved && !prefilled.current) {
+      prefilled.current = true;
+      setForm((f) => ({
+        ...f,
+        name: saved.name, address1: saved.address1, address2: saved.address2 ?? "",
+        city: saved.city, postal: saved.postal, country: saved.country,
+      }));
+    }
+  }, [saved]);
+
+  function useSavedAddress() {
+    if (!saved) return;
+    setForm((f) => ({
+      ...f,
+      name: saved.name, address1: saved.address1, address2: saved.address2 ?? "",
+      city: saved.city, postal: saved.postal, country: saved.country,
+    }));
+    setUseNewAddress(false);
+    setErrors({});
+  }
+
+  function useDifferentAddress() {
+    setForm((f) => ({ ...f, name: "", address1: "", address2: "", city: "", postal: "", country: "United Kingdom" }));
+    setUseNewAddress(true);
+    setErrors({});
+  }
 
   const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);
   // Digital downloads aren't shipped — only charge shipping when a physical item is present.
@@ -195,18 +230,47 @@ export default function CheckoutPage() {
 
           {step === 2 && (
             <div className="form">
-              <Field label="Full name" value={form.name} onChange={(v) => set("name", v)} error={errors.name} />
-              <Field label="Address line 1" value={form.address1} onChange={(v) => set("address1", v)} error={errors.address1} />
-              <Field label="Address line 2 (optional)" value={form.address2} onChange={(v) => set("address2", v)} />
-              <div className="form-row">
-                <Field label="City" value={form.city} onChange={(v) => set("city", v)} error={errors.city} />
-                <Field label="Postal code" value={form.postal} onChange={(v) => set("postal", v)} error={errors.postal} />
-              </div>
-              <SelectField label="Country" value={form.country} onChange={(v) => set("country", v)} options={COUNTRIES} />
-              <div className="form-actions">
-                <button className="ghost" onClick={() => setStep(1)}>← Back</button>
-                <button className="primary" onClick={next}>Continue to payment →</button>
-              </div>
+              {saved && !useNewAddress ? (
+                <>
+                  <div className={styles.payBox}>
+                    <div className="kicker">Saved shipping address</div>
+                    <p style={{ margin: 0, lineHeight: 1.6 }}>
+                      <strong>{saved.name}</strong><br />
+                      {saved.address1}{saved.address2 ? `, ${saved.address2}` : ""}<br />
+                      {saved.city}, {saved.postal}<br />
+                      {saved.country}
+                    </p>
+                  </div>
+                  <button className="ghost" type="button" onClick={useDifferentAddress}>
+                    Ship to a different address
+                  </button>
+                  <div className="form-actions">
+                    <button className="ghost" onClick={() => setStep(1)}>← Back</button>
+                    <button className="primary" onClick={next}>Continue to payment →</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Field label="Full name" value={form.name} onChange={(v) => set("name", v)} error={errors.name} />
+                  <Field label="Address line 1" value={form.address1} onChange={(v) => set("address1", v)} error={errors.address1} />
+                  <Field label="Address line 2 (optional)" value={form.address2} onChange={(v) => set("address2", v)} />
+                  <div className="form-row">
+                    <Field label="City" value={form.city} onChange={(v) => set("city", v)} error={errors.city} />
+                    <Field label="Postal code" value={form.postal} onChange={(v) => set("postal", v)} error={errors.postal} />
+                  </div>
+                  <SelectField label="Country" value={form.country} onChange={(v) => set("country", v)} options={COUNTRIES} />
+                  {saved && (
+                    <button className="ghost" type="button" onClick={useSavedAddress}>
+                      ← Use saved address
+                    </button>
+                  )}
+                  <p className="form-note">This address is saved to your account for next time.</p>
+                  <div className="form-actions">
+                    <button className="ghost" onClick={() => setStep(1)}>← Back</button>
+                    <button className="primary" onClick={next}>Continue to payment →</button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

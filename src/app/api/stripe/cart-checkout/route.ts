@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
-import { stripe } from "@/lib/stripe";
-import { resolveLine, DEFAULT_SHIPPING_FEE } from "@/lib/pricing";
+import { stripe, stripeSecretKey } from "@/lib/stripe";
+import { resolveLine, DEFAULT_SHIPPING_FEE, DIGITAL_PRICE } from "@/lib/pricing";
 import { adminCreatePendingOrder } from "@/lib/orderAdmin";
 import { publicOrigin } from "@/lib/requestOrigin";
 import type { Artwork, FormatOption, FrameOption, OrderItem, ShippingAddress } from "@/lib/types";
@@ -28,7 +28,7 @@ interface IncomingItem {
  * promoted to "paid" only once Stripe confirms (order-confirm redirect + webhook).
  */
 export async function POST(req: NextRequest) {
-  if (!process.env.STRIPE_SECRET_KEY) return bad("Payments are not configured yet.", 503);
+  if (!stripeSecretKey()) return bad("Payments are not configured yet.", 503);
 
   // 1) Authenticate the buyer.
   const authz = req.headers.get("authorization") ?? "";
@@ -56,11 +56,12 @@ export async function POST(req: NextRequest) {
   if (incoming.length > 50) return bad("Too many items in one order.");
 
   // 3) Load the catalogue + shipping setting server-side — the source of truth.
-  const [artSnap, fmtSnap, frmSnap, shipSnap] = await Promise.all([
+  const [artSnap, fmtSnap, frmSnap, shipSnap, digitalSnap] = await Promise.all([
     adminDb.collection("artworks").get(),
     adminDb.collection("formats").get(),
     adminDb.collection("frames").get(),
     adminDb.collection("settings").doc("shipping").get(),
+    adminDb.collection("settings").doc("digital").get(),
   ]);
   const artworks = new Map<string, Artwork>(
     artSnap.docs.map((d) => [d.id, { id: d.id, ...d.data() } as Artwork])
@@ -69,6 +70,8 @@ export async function POST(req: NextRequest) {
   const frames = frmSnap.docs.map((d) => ({ id: d.id, ...d.data() } as FrameOption));
   const shipFeeRaw = shipSnap.exists ? shipSnap.data()?.fee : undefined;
   const shippingFee = typeof shipFeeRaw === "number" && shipFeeRaw >= 0 ? shipFeeRaw : DEFAULT_SHIPPING_FEE;
+  const digitalPriceRaw = digitalSnap.exists ? digitalSnap.data()?.price : undefined;
+  const digitalPrice = typeof digitalPriceRaw === "number" && digitalPriceRaw >= 0 ? digitalPriceRaw : DIGITAL_PRICE;
 
   // 4) Resolve every line authoritatively → order items + Stripe line items.
   const orderItems: OrderItem[] = [];
@@ -82,7 +85,7 @@ export async function POST(req: NextRequest) {
     const resolved = resolveLine(artwork, formats, frames, {
       variantId: raw.variantId ?? "",
       frameId: raw.frameId ?? "none",
-    });
+    }, digitalPrice);
     if (!resolved) return bad(`"${artwork.lotNumber}" can't be purchased online in that format.`, 409);
 
     const qty = Math.max(1, Math.min(99, Math.floor(Number(raw.qty) || 1)));
@@ -181,6 +184,19 @@ export async function POST(req: NextRequest) {
     // webhook can't recreate it, so surface a soft failure rather than charging
     // with no record.
     return bad("Could not prepare your order. Please try again.", 500);
+  }
+
+  // Save the shipping address to the buyer's profile so it pre-fills next time.
+  // Best-effort — must never fail the checkout. Admin SDK bypasses rules.
+  if (shipTo) {
+    try {
+      await adminDb.collection("users").doc(uid).set(
+        { shipTo, updatedAt: Date.now() },
+        { merge: true }
+      );
+    } catch {
+      // Non-critical: the order is already placed; a failed address save is fine.
+    }
   }
 
   return NextResponse.json({ url: session.url, orderId });

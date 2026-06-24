@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import type { CartItem, Theme, Typography, Density, Artwork, Category, FrameOption, FormatOption } from "@/lib/types";
 import { ARTWORKS as STATIC_ARTWORKS } from "@/lib/data";
-import { DEFAULT_SHIPPING_FEE } from "@/lib/pricing";
+import { DEFAULT_SHIPPING_FEE, DIGITAL_PRICE } from "@/lib/pricing";
 
 interface TweakValues {
   theme: Theme;
@@ -30,6 +30,7 @@ interface AppContextValue {
   frames: FrameOption[];
   formats: FormatOption[];
   shippingFee: number;        // flat fee for physical orders (admin-editable)
+  digitalPrice: number;       // flat price for digital downloads (admin-editable)
   dataLoading: boolean;
   refreshData: () => void;
   // Cart
@@ -76,18 +77,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [frames, setFrames] = useState<FrameOption[]>([]);
   const [formats, setFormats] = useState<FormatOption[]>([]);
   const [shippingFee, setShippingFee] = useState<number>(DEFAULT_SHIPPING_FEE);
+  const [digitalPrice, setDigitalPrice] = useState<number>(DIGITAL_PRICE);
   const [dataLoading, setDataLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const { getArtworks, getCategories, getFrames, getFormats, getShippingFee } = await import("@/lib/firestore");
-      const [arts, cats, frs, fmts, ship] = await Promise.all([getArtworks(), getCategories(), getFrames(), getFormats(), getShippingFee()]);
+      const { getArtworks, getCategories, getFrames, getFormats, getShippingFee, getDigitalPrice } = await import("@/lib/firestore");
+      const [arts, cats, frs, fmts, ship, digital] = await Promise.all([getArtworks(), getCategories(), getFrames(), getFormats(), getShippingFee(), getDigitalPrice()]);
       setArtworks(arts);
       setCategories(cats);
       setFrames(frs);
       setFormats(fmts);
       setShippingFee(ship);
+      setDigitalPrice(digital);
     } catch {
       // Firestore not configured yet — keep static fallback
     } finally {
@@ -148,7 +151,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider value={{
       tweaks, setTweak, cssVars,
-      artworks, categories, frames, formats, shippingFee, dataLoading, refreshData: loadData,
+      artworks, categories, frames, formats, shippingFee, digitalPrice, dataLoading, refreshData: loadData,
       cart, cartCount, cartOpen, setCartOpen, addToCart, removeFromCart, updateQty, clearCart,
       revealedArtworks, revealArtwork,
     }}>

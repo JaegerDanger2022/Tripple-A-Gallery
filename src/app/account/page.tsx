@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { TIER_LABELS } from "@/lib/tier";
+import { saveBlobResponse } from "@/lib/download";
 import type { Order } from "@/lib/types";
 import styles from "./account.module.css";
 
@@ -27,6 +28,12 @@ function AccountInner() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [downloadErr, setDownloadErr] = useState("");
+  // Saved shipping address editor.
+  const [editingAddr, setEditingAddr] = useState(false);
+  const [addrForm, setAddrForm] = useState({ name: "", address1: "", address2: "", city: "", postal: "", country: "United Kingdom" });
+  const [addrSaving, setAddrSaving] = useState(false);
+  const [addrErr, setAddrErr] = useState("");
+  const [addrMsg, setAddrMsg] = useState("");
   // Billing-portal handoff state.
   const [openingPortal, setOpeningPortal] = useState(false);
   const [billingErr, setBillingErr] = useState("");
@@ -81,8 +88,9 @@ function AccountInner() {
     return () => { live = false; };
   }, [authLoading, user, searchParams, refreshProfile]);
 
-  // Gated download: exchange the user's ID token for a short-lived signed URL,
-  // then hand the browser off to it. The hi-res file is never publicly linked.
+  // Gated download: send the user's ID token, receive the file bytes (the route
+  // re-checks the purchase on every request), then save the blob. The hi-res file
+  // is never publicly linked or given a shareable URL.
   async function handleDownload(artworkId: string) {
     if (!user) return;
     setDownloadErr("");
@@ -92,16 +100,64 @@ function AccountInner() {
       const res = await fetch(`/api/download?artworkId=${encodeURIComponent(artworkId)}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const body = await res.json().catch(() => ({}));
-      if (res.ok && body.url) {
-        window.location.href = body.url;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setDownloadErr(body.error || "Could not start the download.");
         return;
       }
-      setDownloadErr(body.error || "Could not start the download.");
+      await saveBlobResponse(res, artworkId);
     } catch {
       setDownloadErr("Could not start the download. Please try again.");
     } finally {
       setDownloading(null);
+    }
+  }
+
+  // ── Saved shipping address ──────────────────────────────────────────────────
+  function setAddr(k: keyof typeof addrForm, v: string) {
+    setAddrForm((f) => ({ ...f, [k]: v }));
+  }
+  function startEditAddr() {
+    const s = profile?.shipTo;
+    setAddrForm({
+      name: s?.name ?? "", address1: s?.address1 ?? "", address2: s?.address2 ?? "",
+      city: s?.city ?? "", postal: s?.postal ?? "", country: s?.country ?? "United Kingdom",
+    });
+    setAddrErr(""); setAddrMsg(""); setEditingAddr(true);
+  }
+  async function saveAddr() {
+    if (!user) return;
+    if (!addrForm.name || !addrForm.address1 || !addrForm.city || !addrForm.postal) {
+      setAddrErr("Please fill in name, address, city and postal code."); return;
+    }
+    setAddrSaving(true); setAddrErr("");
+    try {
+      const { setUserShipTo } = await import("@/lib/firestore");
+      await setUserShipTo(user.uid, {
+        name: addrForm.name, address1: addrForm.address1,
+        ...(addrForm.address2 ? { address2: addrForm.address2 } : {}),
+        city: addrForm.city, postal: addrForm.postal, country: addrForm.country,
+      });
+      await refreshProfile();
+      setEditingAddr(false); setAddrMsg("Address saved.");
+    } catch {
+      setAddrErr("Couldn't save — please try again.");
+    } finally {
+      setAddrSaving(false);
+    }
+  }
+  async function removeAddr() {
+    if (!user) return;
+    setAddrSaving(true); setAddrErr("");
+    try {
+      const { removeUserShipTo } = await import("@/lib/firestore");
+      await removeUserShipTo(user.uid);
+      await refreshProfile();
+      setEditingAddr(false); setAddrMsg("Address removed.");
+    } catch {
+      setAddrErr("Couldn't remove — please try again.");
+    } finally {
+      setAddrSaving(false);
     }
   }
 
@@ -219,6 +275,60 @@ function AccountInner() {
             </button>
           )}
         </div>
+      </section>
+
+      {/* Saved shipping address */}
+      <section className={styles.body}>
+        <div className={styles.sectionHd}>
+          <h2>Shipping address</h2>
+          <span className="kicker">Pre-fills your checkout</span>
+        </div>
+
+        {addrMsg && <p className={styles.muted}>{addrMsg}</p>}
+        {addrErr && <p className={styles.downloadErr}>{addrErr}</p>}
+
+        {!editingAddr ? (
+          profile?.shipTo ? (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
+              <p style={{ margin: 0, lineHeight: 1.6 }}>
+                <strong>{profile.shipTo.name}</strong><br />
+                {profile.shipTo.address1}{profile.shipTo.address2 ? `, ${profile.shipTo.address2}` : ""}<br />
+                {profile.shipTo.city}, {profile.shipTo.postal}<br />
+                {profile.shipTo.country}
+              </p>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="ghost" onClick={startEditAddr}>Edit</button>
+                <button className="ghost" onClick={removeAddr} disabled={addrSaving}>Remove</button>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.empty}>
+              <p>No saved address yet — add one to speed up checkout.</p>
+              <button className="primary" onClick={startEditAddr}>Add address →</button>
+            </div>
+          )
+        ) : (
+          <div className="form" style={{ maxWidth: 520 }}>
+            <label className="field"><span className="field-lbl">Full name</span>
+              <input value={addrForm.name} onChange={(e) => setAddr("name", e.target.value)} /></label>
+            <label className="field"><span className="field-lbl">Address line 1</span>
+              <input value={addrForm.address1} onChange={(e) => setAddr("address1", e.target.value)} /></label>
+            <label className="field"><span className="field-lbl">Address line 2 (optional)</span>
+              <input value={addrForm.address2} onChange={(e) => setAddr("address2", e.target.value)} /></label>
+            <div className="form-row">
+              <label className="field"><span className="field-lbl">City</span>
+                <input value={addrForm.city} onChange={(e) => setAddr("city", e.target.value)} /></label>
+              <label className="field"><span className="field-lbl">Postal code</span>
+                <input value={addrForm.postal} onChange={(e) => setAddr("postal", e.target.value)} /></label>
+            </div>
+            <label className="field"><span className="field-lbl">Country</span>
+              <input value={addrForm.country} onChange={(e) => setAddr("country", e.target.value)} /></label>
+            <div className="form-actions">
+              <button className="ghost" onClick={() => setEditingAddr(false)} disabled={addrSaving}>Cancel</button>
+              <button className="primary" onClick={saveAddr} disabled={addrSaving}>{addrSaving ? "Saving…" : "Save address"}</button>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className={styles.body}>

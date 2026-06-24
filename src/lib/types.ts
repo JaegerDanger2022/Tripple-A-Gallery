@@ -16,6 +16,9 @@ export interface Artwork {
   imageUrl?: string;
   hiResPath?: string;      // PRIVATE Storage path of the full-res digital-download file
                            // (served only via signed URL to verified buyers)
+  digitalEnabled?: boolean; // when a hi-res file is present, whether the digital
+                           // download is offered for sale. Undefined = enabled, so
+                           // existing works with a hi-res file stay purchasable.
   order?: number;          // for custom sort in browse
 }
 
@@ -110,6 +113,8 @@ export interface UserProfile {
                                  // the admin-set tier always wins until unlocked.
   notifiedTier?: Tier;           // last tier the user was emailed about — used to
                                  // send membership change emails exactly once.
+  shipTo?: ShippingAddress;      // last shipping address used at checkout — saved
+                                 // so it can pre-fill the next order.
 }
 
 export interface FormatOption {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebaseAdmin";
-import { stripe } from "@/lib/stripe";
+import { stripe, stripeSecretKey } from "@/lib/stripe";
 import { adminStripeCustomerId } from "@/lib/userAdmin";
 
 export const runtime = "nodejs";
@@ -30,7 +30,7 @@ function publicOrigin(req: NextRequest): string {
  * tier — this route only hands the user off to Stripe's hosted portal.
  */
 export async function POST(req: NextRequest) {
-  if (!process.env.STRIPE_SECRET_KEY) return bad("Billing is not configured yet.", 503);
+  if (!stripeSecretKey()) return bad("Billing is not configured yet.", 503);
 
   const authz = req.headers.get("authorization") ?? "";
   const token = authz.startsWith("Bearer ") ? authz.slice(7) : null;

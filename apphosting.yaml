@@ -27,23 +27,47 @@ env:
     value: https://tripleagallery.com
 
   # ── Stripe ────────────────────────────────────────────────────────────────
-  # Price IDs are not sensitive — safe as plaintext. (Test-mode IDs for now.)
-  - variable: STRIPE_PRICE_TIER1_MONTHLY
+  # One switch selects the credential set used at runtime: test | live.
+  # Flip to "live" ONLY after the _LIVE price IDs + secrets below are filled in
+  # and uncommented. The code falls back to un-suffixed vars if a _TEST/_LIVE
+  # one is missing, so this stays backward-compatible.
+  - variable: STRIPE_MODE
+    value: test
+
+  # Price IDs are not sensitive — safe as plaintext. Test-mode IDs:
+  - variable: STRIPE_PRICE_TIER1_MONTHLY_TEST
     value: price_1TitVxCgMLH7jdHObFwhf2yB
-  - variable: STRIPE_PRICE_TIER1_YEARLY
+  - variable: STRIPE_PRICE_TIER1_YEARLY_TEST
     value: price_1TitWLCgMLH7jdHOoBP5tB56
-  - variable: STRIPE_PRICE_TIER2_MONTHLY
+  - variable: STRIPE_PRICE_TIER2_MONTHLY_TEST
     value: price_1TitWtCgMLH7jdHOIqY4Hs5M
-  - variable: STRIPE_PRICE_TIER2_YEARLY
+  - variable: STRIPE_PRICE_TIER2_YEARLY_TEST
     value: price_1TitXKCgMLH7jdHOcTuzNHTe
+  # Live-mode price IDs — fill in + uncomment before going live:
+  # - variable: STRIPE_PRICE_TIER1_MONTHLY_LIVE
+  #   value: price_…
+  # - variable: STRIPE_PRICE_TIER1_YEARLY_LIVE
+  #   value: price_…
+  # - variable: STRIPE_PRICE_TIER2_MONTHLY_LIVE
+  #   value: price_…
+  # - variable: STRIPE_PRICE_TIER2_YEARLY_LIVE
+  #   value: price_…
 
   # Secrets — values live in Cloud Secret Manager, never in this file/repo.
-  # Create them in the Firebase Console (or `firebase apphosting:secrets:set`),
-  # then `firebase apphosting:secrets:grantaccess` so the backend can read them.
-  - variable: STRIPE_SECRET_KEY
+  # The existing test secrets populate the _TEST variables:
+  - variable: STRIPE_SECRET_KEY_TEST
     secret: STRIPE_SECRET_KEY
-  - variable: STRIPE_WEBHOOK_SECRET
+  - variable: STRIPE_WEBHOOK_SECRET_TEST
     secret: STRIPE_WEBHOOK_SECRET
+  # Going live — create these secrets first, then uncomment:
+  #   firebase apphosting:secrets:set STRIPE_SECRET_KEY_LIVE
+  #   firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET_LIVE
+  #   firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY_LIVE
+  #   firebase apphosting:secrets:grantaccess STRIPE_WEBHOOK_SECRET_LIVE
+  # - variable: STRIPE_SECRET_KEY_LIVE
+  #   secret: STRIPE_SECRET_KEY_LIVE
+  # - variable: STRIPE_WEBHOOK_SECRET_LIVE
+  #   secret: STRIPE_WEBHOOK_SECRET_LIVE
 
   # ── Email (Resend) ─────────────────────────────────────────────────────────
   # API key is a secret. Senders/contact have code defaults (orders@, no-reply@,

@@ -7,8 +7,6 @@ import type { Order } from "@/lib/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const SIGNED_URL_TTL_MS = 15 * 60 * 1000; // 15 minutes
-
 function unauthorized(msg: string) {
   return NextResponse.json({ error: msg }, { status: 401 });
 }
@@ -68,17 +66,32 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 4) Issue a short-lived signed URL. Returned as JSON so the client can
-  //    navigate the browser straight to it (no double-fetch of the bytes).
+  // 4) Stream the file's bytes straight back to the verified buyer. We deliberately
+  //    do NOT mint a signed URL — that would create a shareable, time-limited link
+  //    anyone could reuse. Streaming keeps every download behind this gate, where
+  //    the token + purchase are checked on each request, and needs no signing
+  //    permission (works on user ADC locally and the runtime SA in production).
   try {
     const file = adminStorage.bucket().file(hiResPath);
-    const downloadName = `${artworkId}-hi-res`.replace(/[^\w.\-]+/g, "_");
-    const [url] = await file.getSignedUrl({
-      action: "read",
-      expires: Date.now() + SIGNED_URL_TTL_MS,
-      responseDisposition: `attachment; filename="${downloadName}"`,
+    const [buf] = await file.download();
+    let contentType = "application/octet-stream";
+    try {
+      const [meta] = await file.getMetadata();
+      if (meta.contentType) contentType = meta.contentType;
+    } catch {
+      // Metadata is best-effort — fall back to a generic binary type.
+    }
+    const ext = hiResPath.includes(".") ? hiResPath.slice(hiResPath.lastIndexOf(".")) : "";
+    const downloadName = `${artworkId}-hi-res${ext}`.replace(/[^\w.\-]+/g, "_");
+    return new NextResponse(new Uint8Array(buf), {
+      status: 200,
+      headers: {
+        "Content-Type": contentType,
+        "Content-Disposition": `attachment; filename="${downloadName}"`,
+        "Content-Length": String(buf.length),
+        "Cache-Control": "private, no-store",
+      },
     });
-    return NextResponse.json({ url });
   } catch {
     return NextResponse.json(
       { error: "Could not prepare the download. Please try again." },
